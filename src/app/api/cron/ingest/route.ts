@@ -52,6 +52,12 @@ async function handleIngest(request: NextRequest) {
     // 2. Filter out already ingested articles (deduplicate)
     const uniqueCandidates: typeof candidates = [];
     for (const item of candidates) {
+      // Validate absolute URL
+      if (!item.sourceUrl || (!item.sourceUrl.startsWith('http://') && !item.sourceUrl.startsWith('https://'))) {
+        skipped++;
+        continue;
+      }
+
       // Check slug uniqueness
       const slug = item.headline
         .toLowerCase()

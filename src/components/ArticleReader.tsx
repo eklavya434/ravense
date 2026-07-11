@@ -61,12 +61,22 @@ interface Article {
   entities: Mention[];
 }
 
+interface Opinion {
+  id: string;
+  articleId: string;
+  body: string;
+  sessionId: string;
+  status: string;
+  createdAt: string | Date;
+}
+
 interface ArticleReaderProps {
   article: Article;
   initialVotes: number[];
+  initialOpinions: Opinion[];
 }
 
-export default function ArticleReader({ article, initialVotes }: ArticleReaderProps) {
+export default function ArticleReader({ article, initialVotes, initialOpinions }: ArticleReaderProps) {
   const [selectedEntity, setSelectedEntity] = useState<Entity | null>(null);
   const [voteValue, setVoteValue] = useState<number>(50);
   const [hasVoted, setHasVoted] = useState<boolean>(false);
@@ -79,6 +89,9 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
     average: initialVotes.length > 0 ? initialVotes.reduce((a, b) => a + b, 0) / initialVotes.length : 50,
     buckets: calculateBuckets(initialVotes),
   });
+  const [opinions, setOpinions] = useState<Opinion[]>(initialOpinions);
+  const [opinionText, setOpinionText] = useState<string>('');
+  const [opinionMsg, setOpinionMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Load user vote from local storage if exists
@@ -90,7 +103,7 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
     }
   }, [article.slug]);
 
-  // Fetch latest votes on mount
+  // Fetch latest votes & opinions on mount
   useEffect(() => {
     const fetchVotes = async () => {
       try {
@@ -105,6 +118,9 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
           if (data.userVote !== null && data.userVote !== undefined) {
             setHasVoted(true);
             setVoteValue(data.userVote);
+          }
+          if (data.opinions) {
+            setOpinions(data.opinions);
           }
         }
       } catch (err) {
@@ -123,14 +139,15 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
     return buckets;
   }
 
-  // Handle vote submit
+  // Handle vote & opinion submit
   const handleVoteSubmit = async () => {
     setIsSubmitting(true);
+    setOpinionMsg(null);
     try {
       const res = await fetch(`/api/articles/${article.slug}/stance`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: voteValue }),
+        body: JSON.stringify({ value: voteValue, opinion: opinionText }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -141,6 +158,18 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
         });
         setHasVoted(true);
         localStorage.setItem(`voted_${article.slug}`, String(voteValue));
+
+        if (data.opinions) {
+          setOpinions(data.opinions);
+        }
+
+        if (data.opinionStatus === 'approved') {
+          setOpinionMsg('Your opinion was approved and published successfully.');
+        } else if (data.opinionStatus === 'rejected') {
+          setOpinionMsg('Your opinion was flagged as toxicity or off-topic and filtered.');
+        } else if (data.opinionError) {
+          setOpinionMsg(data.opinionError);
+        }
       }
     } catch (err) {
       console.error('Error submitting vote:', err);
@@ -225,8 +254,6 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
     minute: '2-digit',
     timeZoneName: 'short'
   });
-
-  const maxBucketCount = Math.max(...votesData.buckets, 1);
 
   // Stance axis labels per category
   const stanceAxisDefaults = DEFAULT_STANCE_AXIS[article.category as CategoryKey] || {
@@ -363,13 +390,14 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
               <p className="indent-8">{renderBody()}</p>
             </section>
 
+            {/* Prominent external link button */}
             {article.sourceUrl && (
-              <div className="pt-4">
+              <div className="pt-6 border-t border-ink/5 mt-8 flex justify-center md:justify-start">
                 <a 
                   href={article.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-xs text-wax hover:underline inline-flex items-center gap-1.5"
+                  className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider bg-ink text-paper hover:bg-wax hover:text-paper font-semibold px-5 py-2.5 rounded transition-all duration-200 shadow-sm focus:outline-none"
                 >
                   Read full story at {article.sourceName || 'original publisher'} {article.sourceCountry ? `(${article.sourceCountry})` : ''} &nearr;
                 </a>
@@ -494,12 +522,12 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
             </span>
             <h3 className="font-serif text-2xl font-bold text-ink">Register Your Stance</h3>
             <p className="font-sans text-xs text-ink/60 mt-1">
-              Provide your calibration input to help maps structured reader assessments.
+              Provide your calibration input and optional perspective to map reader assessments.
             </p>
           </header>
 
           {/* Stance Form */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div>
               <input 
                 type="range"
@@ -521,81 +549,95 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
               </div>
             </div>
 
+            {!hasVoted && (
+              <div className="space-y-2 mt-4">
+                <label htmlFor="opinionText" className="block font-mono text-[10px] uppercase tracking-wider text-ink/60">
+                  Add an Opinion (Optional, max 500 characters)
+                </label>
+                <textarea
+                  id="opinionText"
+                  value={opinionText}
+                  onChange={(e) => setOpinionText(e.target.value.substring(0, 500))}
+                  rows={3}
+                  placeholder="What's your take? Write your perspective here..."
+                  className="w-full px-3 py-2 border border-ink/20 rounded bg-paper/30 font-sans text-xs leading-relaxed text-ink focus:outline-none focus:border-wax focus:bg-paper"
+                />
+                <div className="text-right font-mono text-[9px] text-ink/40">
+                  {opinionText.length}/500
+                </div>
+              </div>
+            )}
+
             {!hasVoted ? (
-              <div className="flex justify-center">
+              <div className="flex justify-center pt-2">
                 <button
                   onClick={handleVoteSubmit}
                   disabled={isSubmitting}
-                  className="font-mono text-xs uppercase tracking-wider bg-ink text-paper hover:bg-wax hover:text-paper font-semibold px-6 py-2.5 rounded transition-all duration-200 shadow-sm focus:outline-none"
+                  className="font-mono text-xs uppercase tracking-wider bg-ink text-paper hover:bg-wax hover:text-paper font-semibold px-6 py-2.5 rounded transition-all duration-200 shadow-sm focus:outline-none cursor-pointer"
                 >
                   {isSubmitting ? 'Recording...' : 'Submit Stance'}
                 </button>
               </div>
             ) : (
-              <div className="bg-ink/5 p-4 rounded text-center">
+              <div className="bg-ink/5 p-4 rounded text-center space-y-1">
                 <p className="font-mono text-xs text-wax font-semibold uppercase tracking-wider">
                   Stance registered successfully
                 </p>
-                <p className="font-sans text-xs text-ink/50 mt-1">
+                <p className="font-sans text-xs text-ink/65">
                   Your stance value: {voteValue}%
                 </p>
+                {opinionMsg && (
+                  <p className="font-sans text-xs text-ink/60 italic mt-2 border-t border-ink/5 pt-1.5">
+                    {opinionMsg}
+                  </p>
+                )}
               </div>
             )}
           </div>
 
-          {/* Aggregated distribution visual curve/bar histogram */}
-          <div className="mt-12 border-t border-ink/5 pt-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+          {/* Reader Perspectives List */}
+          <div className="mt-10 border-t border-ink/10 pt-8">
+            <div className="flex items-center justify-between gap-4 mb-6">
               <div>
-                <h4 className="font-serif text-sm font-bold text-ink">Aggregate Distribution</h4>
+                <h4 className="font-serif text-sm font-bold text-ink">Reader Perspectives</h4>
                 <p className="font-mono text-[10px] text-ink/50 uppercase tracking-widest mt-0.5">
-                  Based on {votesData.votesCount} reporting sessions
+                  Approved perspectives from active reporting sessions
                 </p>
               </div>
               <div className="font-mono text-xs">
-                <span className="text-ink/60">Mean Consensus Stance: </span>
+                <span className="text-ink/60">Mean Consensus: </span>
                 <span className="font-bold text-wax">{votesData.average.toFixed(1)}%</span>
               </div>
             </div>
 
-            {/* Histogram representation */}
-            <div className="h-28 flex items-end gap-1.5 md:gap-2 px-2 border-b border-ink/20">
-              {votesData.buckets.map((count, idx) => {
-                const pct = (count / maxBucketCount) * 100;
-                // Highlight the bucket the user's vote is in, if they voted
-                const isUserBucket = hasVoted && Math.min(Math.floor(voteValue / 10), 9) === idx;
-
-                return (
-                  <div 
-                    key={idx} 
-                    className="flex-1 flex flex-col justify-end h-full group relative"
-                  >
-                    {/* Tooltip on hover */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-ink text-paper font-mono text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-10">
-                      {count} votes ({idx * 10}-{(idx * 10) + 9}%)
+            {opinions.length === 0 ? (
+              <div className="text-center py-10 border border-dashed border-ink/10 rounded">
+                <p className="font-serif italic text-xs text-ink/40">No opinions registered yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {opinions.map((op) => (
+                  <div key={op.id} className="bg-ink/5 p-4 rounded border border-ink/5 flex flex-col gap-2 transition-all">
+                    <p className="font-sans text-xs leading-relaxed text-ink/85">{op.body}</p>
+                    <div className="flex items-center justify-between gap-2 border-t border-ink/5 pt-2">
+                      <span className="font-mono text-[8px] text-ink/30 uppercase tracking-wider">
+                        Session: {op.sessionId.substring(0, 8)}...
+                      </span>
+                      <time className="font-mono text-[9px] text-ink/40">
+                        {new Date(op.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </time>
                     </div>
-                    {/* Histogram Bar */}
-                    <div 
-                      style={{ height: `${Math.max(pct, 2)}%` }}
-                      className={`w-full rounded-t-sm transition-all duration-500 ${
-                        isUserBucket 
-                          ? 'bg-wax border border-wax-dark/30 shadow-[0_0_8px_rgba(201,138,59,0.3)]' 
-                          : 'bg-ink/20 group-hover:bg-ink/40'
-                      }`}
-                    />
                   </div>
-                );
-              })}
-            </div>
-            <div className="flex justify-between mt-2 font-mono text-[9px] text-ink/40">
-              <span>0%</span>
-              <span>20%</span>
-              <span>40%</span>
-              <span>60%</span>
-              <span>80%</span>
-              <span>100%</span>
-            </div>
+                ))}
+              </div>
+            )}
           </div>
+
         </section>
       </div>
     </>

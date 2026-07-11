@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getArticleBySlug, getStanceVotes } from '@/lib/data';
+import { getArticleBySlug, getStanceVotes, getApprovedOpinions } from '@/lib/data';
 import ArticleReader from '@/components/ArticleReader';
 
 interface PageProps {
@@ -17,8 +17,9 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
-  // Fetch initial votes for server render
+  // Fetch initial votes and opinions for server render
   const votes = await getStanceVotes(article.id);
+  const opinions = await getApprovedOpinions(article.id);
 
   // Serialize the date fields and types for the client component
   const serializedArticle = {
@@ -53,5 +54,16 @@ export default async function ArticlePage({ params }: PageProps) {
       : null,
   };
 
-  return <ArticleReader article={serializedArticle as any} initialVotes={votes} />;
+  const serializedOpinions = opinions.map((o: any) => ({
+    ...o,
+    createdAt: o.createdAt instanceof Date ? o.createdAt.toISOString() : o.createdAt,
+  }));
+
+  return (
+    <ArticleReader 
+      article={serializedArticle as any} 
+      initialVotes={votes} 
+      initialOpinions={serializedOpinions} 
+    />
+  );
 }

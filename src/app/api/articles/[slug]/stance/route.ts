@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getArticleBySlug, getStanceVotes, recordStanceVote, getUserStanceVote } from '@/lib/data';
-import { getSessionId, setSessionIdCookie } from '@/lib/session';
+import { 
+  getArticleBySlug, 
+  getStanceVotes, 
+  recordStanceVote, 
+  getUserStanceVote, 
+  saveOpinion, 
+  getApprovedOpinions 
+} from '@/lib/data';
+import { getSessionId } from '@/lib/session';
+import { moderateOpinionText } from '@/lib/gemini';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: NextRequest,
@@ -16,6 +26,7 @@ export async function GET(
     const votes = await getStanceVotes(article.id);
     const { id: sessionId } = await getSessionId();
     const userVote = await getUserStanceVote(article.id, sessionId);
+    const opinions = await getApprovedOpinions(article.id);
 
     // Calculate distribution (10-point buckets: 0-9, 10-19, ..., 90-100)
     const buckets = Array(10).fill(0);
@@ -30,7 +41,11 @@ export async function GET(
       votesCount: votes.length,
       average,
       buckets,
-      userVote
+      userVote,
+      opinions: opinions.map((o: any) => ({
+        ...o,
+        createdAt: o.createdAt instanceof Date ? o.createdAt.toISOString() : o.createdAt,
+      })),
     });
   } catch (error) {
     console.error('Error in GET stance votes:', error);
@@ -50,7 +65,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { value } = body;
+    const { value, opinion } = body;
 
     if (typeof value !== 'number' || value < 0 || value > 100) {
       return NextResponse.json({ error: 'Invalid vote value' }, { status: 400 });
@@ -58,11 +73,32 @@ export async function POST(
 
     const { id: sessionId, isNew } = await getSessionId();
 
-    // Save the vote
+    // 1. Save the stance vote
     await recordStanceVote(article.id, value, sessionId);
 
-    // Fetch updated votes
+    // 2. Save opinion if present
+    let opinionStatus = 'none';
+    let opinionError = null;
+
+    if (opinion && typeof opinion === 'string') {
+      const cleanOpinion = opinion.trim();
+      if (cleanOpinion.length > 500) {
+        opinionError = 'Opinion exceeds 500 characters limit.';
+      } else if (cleanOpinion.length > 0) {
+        try {
+          const isApproved = await moderateOpinionText(cleanOpinion);
+          const status = isApproved ? 'approved' : 'rejected';
+          await saveOpinion(article.id, cleanOpinion, sessionId, status);
+          opinionStatus = status;
+        } catch (err: any) {
+          opinionError = err.message || 'Failed to save opinion.';
+        }
+      }
+    }
+
+    // 3. Fetch updated votes & opinions
     const votes = await getStanceVotes(article.id);
+    const approvedOpinions = await getApprovedOpinions(article.id);
 
     // Calculate distribution
     const buckets = Array(10).fill(0);
@@ -79,11 +115,16 @@ export async function POST(
       average,
       buckets,
       userVote: value,
+      opinionStatus,
+      opinionError,
+      opinions: approvedOpinions.map((o: any) => ({
+        ...o,
+        createdAt: o.createdAt instanceof Date ? o.createdAt.toISOString() : o.createdAt,
+      })),
     });
 
     // Set cookie if session is new
     if (isNew) {
-      // Set the session cookie on the response
       response.cookies.set('ravense_session_id', sessionId, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -95,7 +136,7 @@ export async function POST(
 
     return response;
   } catch (error) {
-    console.error('Error in POST stance vote:', error);
+    console.error('Error in POST stance vote & opinion:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

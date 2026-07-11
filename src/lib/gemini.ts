@@ -71,6 +71,8 @@ Headline: "${headline}"
 Body: "${body}"
 
 Extract all load-bearing entities (organizations, treaties, agreements, geographic flashpoints, technical/political terms that a general reader might not know).
+CRITICAL: When extracting entities, preserve context qualifiers such as country or organization names attached to generic terms (e.g. extract "Indian Parliament" instead of just "Parliament", "Reserve Bank of India" instead of just "central bank"). Do not truncate or strip these qualifying details.
+
 For each entity, you MUST find its EXACT text mentions, and their start and end character offsets inside the article body.
 The offsets must be 0-indexed, and the substring \`body.substring(startOffset, endOffset)\` MUST EXACTLY match the mention text.
 
@@ -252,3 +254,34 @@ function getMockContext(name: string): EntityContext {
     ]
   };
 }
+
+export async function moderateOpinionText(text: string): Promise<boolean> {
+  if (!genAI) {
+    return true; // Auto-approve on local offline test
+  }
+  try {
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      generationConfig: {
+        responseMimeType: 'application/json',
+      },
+    });
+    const prompt = `You are a content moderation AI.
+Analyze the following user-submitted opinion on a news article:
+Opinion: "${text}"
+
+Evaluate if the opinion contains toxicity, hate speech, severe insults, off-topic spam, or excessive vulgarity.
+Return your response strictly as a JSON object:
+{
+  "approved": true (if clean, constructive, and on-topic) or false (if contains toxicity, hate speech, spam, or vulgarity)
+}`;
+    const response = await model.generateContent(prompt);
+    const resultText = response.response.text();
+    const result = JSON.parse(resultText);
+    return result.approved === true;
+  } catch (error) {
+    console.error('Error during opinion moderation:', error);
+    return true; 
+  }
+}
+

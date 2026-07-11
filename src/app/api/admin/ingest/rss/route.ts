@@ -21,6 +21,12 @@ export async function POST(request: NextRequest) {
     const skippedArticles = [];
 
     for (const item of rssArticles) {
+      // Validate absolute URL
+      if (!item.sourceUrl || (!item.sourceUrl.startsWith('http://') && !item.sourceUrl.startsWith('https://'))) {
+        skippedArticles.push({ headline: item.headline, reason: 'Invalid or relative source URL' });
+        continue;
+      }
+
       // Create a clean slug
       const slug = item.headline
         .toLowerCase()

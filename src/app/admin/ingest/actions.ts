@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { saveArticle } from '@/lib/data';
 import { extractEntities, generateEntityContext } from '@/lib/gemini';
 import { Category } from '@prisma/client';
+import { normalizeUrl } from '@/lib/rss';
 
 export async function ingestArticle(formData: FormData) {
   const headline = formData.get('headline') as string;
@@ -19,6 +20,15 @@ export async function ingestArticle(formData: FormData) {
 
   if (!headline || !body || !category) {
     throw new Error('Headline, body, and category are required.');
+  }
+
+  let normalizedSourceUrl = undefined;
+  if (sourceUrl) {
+    const resUrl = normalizeUrl(sourceUrl);
+    if (!resUrl) {
+      throw new Error('Source URL must be a valid absolute HTTP/HTTPS URL.');
+    }
+    normalizedSourceUrl = resUrl;
   }
 
   // Generate slug
@@ -69,7 +79,7 @@ export async function ingestArticle(formData: FormData) {
     slug,
     body,
     category,
-    sourceUrl,
+    sourceUrl: normalizedSourceUrl,
     sourceName,
     sourceCountry,
     publishedAt: new Date(),

@@ -12,6 +12,38 @@ export interface RssArticleItem {
   sourceCountry: string;
 }
 
+export function normalizeUrl(url: string, feedUrl?: string): string | null {
+  if (!url) return null;
+  let normalized = url.trim();
+
+  // If starts with protocol-relative double slash
+  if (normalized.startsWith('//')) {
+    return 'https:' + normalized;
+  }
+
+  // If already absolute HTTP/HTTPS
+  if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+    return normalized;
+  }
+
+  // Check if it looks like a domain without a protocol (e.g. www.reuters.com or reuters.com/news)
+  if (/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(normalized)) {
+    return 'https://' + normalized;
+  }
+
+  // If relative path (starts with /) and we have a feedUrl to resolve against
+  if (normalized.startsWith('/') && feedUrl) {
+    try {
+      const feedObj = new URL(feedUrl);
+      return `${feedObj.protocol}//${feedObj.hostname}${normalized}`;
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
 export async function fetchRssArticles(category: CategoryKey, limit: number = 3): Promise<RssArticleItem[]> {
   const feeds = RSS_FEEDS_CONFIG[category] || [];
   const articles: RssArticleItem[] = [];
@@ -32,6 +64,9 @@ export async function fetchRssArticles(category: CategoryKey, limit: number = 3)
       for (const item of items) {
         if (!item.title || !item.link) continue;
         
+        const resolvedUrl = normalizeUrl(item.link || '', feedConfig.url);
+        if (!resolvedUrl) continue;
+
         // Clean description (remove html tags)
         const rawContent = item.contentSnippet || item.content || item.summary || "";
         const cleanContent = rawContent
@@ -45,7 +80,7 @@ export async function fetchRssArticles(category: CategoryKey, limit: number = 3)
         articles.push({
           headline: item.title,
           body: cleanContent,
-          sourceUrl: item.link,
+          sourceUrl: resolvedUrl,
           publishedAt: item.pubDate ? new Date(item.pubDate) : new Date(),
           sourceName: feedConfig.name,
           sourceCountry: feedConfig.country

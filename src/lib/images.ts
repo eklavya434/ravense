@@ -2,51 +2,126 @@ import { CATEGORY_QUERY_MAP, CategoryKey } from './categories';
 
 const USER_AGENT = 'Ravense/0.1 (student project; contact: eklavya434@gmail.com)';
 
+// Ambiguous Entity Override Map
+const AMBIGUOUS_ENTITIES_OVERRIDE: Record<string, string> = {
+  "parliament": "Q1968593", // Parliament of India
+  "indian parliament": "Q1968593",
+  "lok sabha": "Q1968593",
+  "cabinet": "Q1148110", // Union Cabinet of India
+  "central bank": "Q809227", // Reserve Bank of India
+  "reserve bank of india": "Q809227",
+  "rbi": "Q809227",
+  "supreme court": "Q971384", // Supreme Court of India
+  "supreme court of india": "Q971384",
+  "national assembly": "Q1968593"
+};
+
+// Helper for direct lookup of image filename by Q-ID
+async function fetchWikidataImageByQId(qId: string): Promise<string | null> {
+  try {
+    const claimsUrl = `https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${qId}&property=P18&format=json`;
+    const res = await fetch(claimsUrl, {
+      headers: { 'User-Agent': USER_AGENT }
+    });
+    if (!res.ok) throw new Error(`Claims lookup failed: ${res.status}`);
+    const data = await res.json();
+    return data.claims?.P18?.[0]?.mainsnak?.datavalue?.value || null;
+  } catch (error) {
+    console.error(`Failed to fetch claims for Q-ID ${qId}:`, error);
+    return null;
+  }
+}
+
+// Helper to check if a Q-ID belongs to a country or expected properties
+async function checkWikidataEntityCountry(qId: string): Promise<string | null> {
+  try {
+    const claimsUrl = `https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${qId}&property=P17&format=json`;
+    const res = await fetch(claimsUrl, {
+      headers: { 'User-Agent': USER_AGENT }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const countryQId = data.claims?.P17?.[0]?.mainsnak?.datavalue?.value?.id;
+    return countryQId || null;
+  } catch {
+    return null;
+  }
+}
+
 // Wikidata entity image resolution
-export async function resolveEntityImage(entityName: string): Promise<{
+export async function resolveEntityImage(entityName: string, category?: string): Promise<{
   imageUrl: string | null;
   imageSource: 'wikidata' | 'none';
 }> {
   try {
-    // 1. Search Wikidata for the entity name
-    const searchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(entityName)}&language=en&format=json`;
+    const queryName = entityName.trim();
+    const lowerName = queryName.toLowerCase();
     
+    console.log(`[WIKIDATA LOOKUP] Querying: "${queryName}" (Category Context: ${category || 'none'})`);
+
+    // 1. Check ambiguous override table
+    if (AMBIGUOUS_ENTITIES_OVERRIDE[lowerName]) {
+      const qId = AMBIGUOUS_ENTITIES_OVERRIDE[lowerName];
+      console.log(`[WIKIDATA OVERRIDE] Matched override: "${queryName}" -> Q-ID: ${qId}`);
+      const filename = await fetchWikidataImageByQId(qId);
+      if (filename) {
+        const imageUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}?width=400`;
+        console.log(`[WIKIDATA ACCEPTED] Entity: "${queryName}" matched to Q-ID: ${qId} via Override`);
+        return { imageUrl, imageSource: 'wikidata' };
+      }
+    }
+
+    // 2. Search Wikidata for the entity name
+    const searchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(queryName)}&language=en&format=json`;
     const searchRes = await fetch(searchUrl, {
       headers: { 'User-Agent': USER_AGENT }
     });
     
     if (!searchRes.ok) throw new Error(`Wikidata search request failed: ${searchRes.status}`);
-    
     const searchData = await searchRes.json();
-    const qId = searchData.search?.[0]?.id;
-    
-    if (!qId) {
+    const searchResults = searchData.search || [];
+
+    if (searchResults.length === 0) {
       return { imageUrl: null, imageSource: 'none' };
     }
-    
-    // 2. Fetch claims for property P18 (image)
-    const claimsUrl = `https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${qId}&property=P18&format=json`;
-    
-    const claimsRes = await fetch(claimsUrl, {
-      headers: { 'User-Agent': USER_AGENT }
-    });
-    
-    if (!claimsRes.ok) throw new Error(`Wikidata claims request failed: ${claimsRes.status}`);
-    
-    const claimsData = await claimsRes.json();
-    const filename = claimsData.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
-    
-    if (!filename) {
-      return { imageUrl: null, imageSource: 'none' };
+
+    // 3. Disambiguation loop: filter top 3 candidates
+    for (const result of searchResults.slice(0, 3)) {
+      const qId = result.id;
+      const label = result.label || '';
+      const desc = result.description || '';
+
+      // If category is national, verify country is India (Q668) or matches generic description filters
+      if (category === 'national') {
+        const countryQId = await checkWikidataEntityCountry(qId);
+        
+        // If it belongs to a country and that country isn't India, reject it for the "national" India-centric context
+        if (countryQId && countryQId !== 'Q668') {
+          console.warn(`[WIKIDATA REJECTED] Candidate Q-ID: ${qId} ("${label}") country is ${countryQId} (expected India Q668)`);
+          continue;
+        }
+
+        // Check search description for other countries (e.g. parliament of norway, cabinet of the UK)
+        const descLower = desc.toLowerCase();
+        if (descLower.includes('norway') || descLower.includes('united kingdom') || descLower.includes('uk ') || descLower.includes('france') || descLower.includes('nepal')) {
+          console.warn(`[WIKIDATA REJECTED] Candidate Q-ID: ${qId} description is ambiguous: "${desc}"`);
+          continue;
+        }
+      }
+
+      // Fetch claims for property P18 (image)
+      const filename = await fetchWikidataImageByQId(qId);
+      if (filename) {
+        const imageUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}?width=400`;
+        console.log(`[WIKIDATA ACCEPTED] Entity: "${queryName}" matched to Q-ID: ${qId} (Label: "${label}", Description: "${desc}")`);
+        return {
+          imageUrl,
+          imageSource: 'wikidata'
+        };
+      }
     }
     
-    // 3. Format Wikimedia Commons filepath URL
-    const imageUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}?width=400`;
-    
-    return {
-      imageUrl,
-      imageSource: 'wikidata'
-    };
+    return { imageUrl: null, imageSource: 'none' };
   } catch (error) {
     console.error(`Error resolving entity image for ${entityName}:`, error);
     return { imageUrl: null, imageSource: 'none' };
