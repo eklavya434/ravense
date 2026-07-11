@@ -1,4 +1,49 @@
 import { prisma } from './db';
+import { resolveEntityImage, resolveCategoryImage } from './images';
+
+// In-memory mock CategoryImages
+const mockCategoryImages: Record<string, { id: string; category: string; imageUrl: string; photographerName: string; photographerUrl: string; fetchedAt: Date }> = {
+  'geopolitics': {
+    id: 'cat-img-geopolitics',
+    category: 'geopolitics',
+    imageUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80",
+    photographerName: "Joakim Honkasalo",
+    photographerUrl: "https://unsplash.com/@jhonkasalo",
+    fetchedAt: new Date()
+  },
+  'domestic-politics': {
+    id: 'cat-img-domestic-politics',
+    category: 'domestic-politics',
+    imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
+    photographerName: "Kyle Glenn",
+    photographerUrl: "https://unsplash.com/@kyleglenn",
+    fetchedAt: new Date()
+  },
+  'economy': {
+    id: 'cat-img-economy',
+    category: 'economy',
+    imageUrl: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=80",
+    photographerName: "M. B. M.",
+    photographerUrl: "https://unsplash.com/@mbm",
+    fetchedAt: new Date()
+  },
+  'macroeconomics': {
+    id: 'cat-img-macroeconomics',
+    category: 'macroeconomics',
+    imageUrl: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=80",
+    photographerName: "M. B. M.",
+    photographerUrl: "https://unsplash.com/@mbm",
+    fetchedAt: new Date()
+  },
+  'security': {
+    id: 'cat-img-security',
+    category: 'security',
+    imageUrl: "https://images.unsplash.com/photo-1508847154043-be12a62861c1?auto=format&fit=crop&w=1200&q=80",
+    photographerName: "Sven-Erik Arndt",
+    photographerUrl: "https://unsplash.com/@sven-erik-arndt",
+    fetchedAt: new Date()
+  }
+};
 
 // In-memory mock fallback data
 const mockNarrative = {
@@ -6,7 +51,7 @@ const mockNarrative = {
   title: 'Global Maritime & Border Security Summit 2026',
 };
 
-const mockEntities = [
+const mockEntities: any[] = [
   {
     id: 'entity-nato',
     name: 'NATO',
@@ -21,7 +66,10 @@ const mockEntities = [
     stakeholders: [
       { name: 'United States', wants: 'Maintenance of Alliance unity and collective deterrence' },
       { name: 'Turkey', wants: 'Recognition of its maritime jurisdiction and regional security role' }
-    ]
+    ],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Flag_of_NATO.svg/400px-Flag_of_NATO.svg.png',
+    imageSource: 'wikidata',
+    imageFetchedAt: new Date()
   },
   {
     id: 'entity-antalya',
@@ -35,7 +83,10 @@ const mockEntities = [
     ],
     stakeholders: [
       { name: 'Turkish Government', wants: 'Promotion of the city as a neutral ground for international mediation' }
-    ]
+    ],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Flag_of_Turkey.svg/400px-Flag_of_Turkey.svg.png',
+    imageSource: 'wikidata',
+    imageFetchedAt: new Date()
   },
   {
     id: 'entity-mediterranean',
@@ -49,7 +100,10 @@ const mockEntities = [
     ],
     stakeholders: [
       { name: 'European Union', wants: 'Secured maritime borders and stable migration management' }
-    ]
+    ],
+    imageUrl: null,
+    imageSource: 'none',
+    imageFetchedAt: null
   },
   {
     id: 'entity-arctic-council',
@@ -66,7 +120,10 @@ const mockEntities = [
       { name: 'Norway', wants: 'Successful chairmanship and preservation of diplomatic channel' },
       { name: 'Russia', wants: 'Unrestricted navigation and mineral exploration rights in its economic zone' },
       { name: 'United States', wants: 'Stricter environmental regulations and limitation of foreign military presence' }
-    ]
+    ],
+    imageUrl: null,
+    imageSource: 'none',
+    imageFetchedAt: null
   },
   {
     id: 'entity-tromso',
@@ -80,7 +137,10 @@ const mockEntities = [
     ],
     stakeholders: [
       { name: 'Arctic Council Secretariat', wants: 'Smooth execution of diplomatic proceedings' }
-    ]
+    ],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Norway.svg/400px-Flag_of_Norway.svg.png',
+    imageSource: 'wikidata',
+    imageFetchedAt: new Date()
   },
   {
     id: 'entity-norway',
@@ -94,7 +154,10 @@ const mockEntities = [
     ],
     stakeholders: [
       { name: 'Norway State', wants: 'Retention of regional stability and stable gas exports to Europe' }
-    ]
+    ],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Norway.svg/400px-Flag_of_Norway.svg.png',
+    imageSource: 'wikidata',
+    imageFetchedAt: new Date()
   },
   {
     id: 'entity-singapore',
@@ -108,7 +171,10 @@ const mockEntities = [
     ],
     stakeholders: [
       { name: 'Port Authority of Singapore', wants: 'Uninterrupted flow of commercial shipping vessels through the strait' }
-    ]
+    ],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Flag_of_Singapore.svg/400px-Flag_of_Singapore.svg.png',
+    imageSource: 'wikidata',
+    imageFetchedAt: new Date()
   },
   {
     id: 'entity-malacca-strait',
@@ -123,7 +189,10 @@ const mockEntities = [
     stakeholders: [
       { name: 'International Shipping Association', wants: 'Enhanced security and reduction of insurance risk premiums' },
       { name: 'Indonesia & Malaysia', wants: 'Maintenance of sovereignty over the waters while securing trade routes' }
-    ]
+    ],
+    imageUrl: null,
+    imageSource: 'none',
+    imageFetchedAt: null
   }
 ];
 
@@ -140,6 +209,8 @@ const mockArticles: any[] = [
     narrativeId: 'narrative-1',
     narrative: mockNarrative,
     stanceAxis: { left: 'De-escalates', right: 'Escalates' },
+    categoryImageId: 'cat-img-geopolitics',
+    categoryImage: mockCategoryImages['geopolitics'],
     entities: [
       { id: 'ae-1-1', startOffset: 15, endOffset: 19, entityId: 'entity-nato', entity: mockEntities[0] },
       { id: 'ae-1-2', startOffset: 32, endOffset: 39, entityId: 'entity-antalya', entity: mockEntities[1] },
@@ -159,6 +230,8 @@ const mockArticles: any[] = [
     narrativeId: null,
     narrative: null,
     stanceAxis: { left: 'Diplomatic De-escalation', right: 'Militarization/Conflict' },
+    categoryImageId: 'cat-img-geopolitics',
+    categoryImage: mockCategoryImages['geopolitics'],
     entities: [
       { id: 'ae-2-1', startOffset: 4, endOffset: 18, entityId: 'entity-arctic-council', entity: mockEntities[3] },
       { id: 'ae-2-2', startOffset: 30, endOffset: 36, entityId: 'entity-tromso', entity: mockEntities[4] },
@@ -169,7 +242,7 @@ const mockArticles: any[] = [
     id: 'article-3',
     headline: 'Trilateral Patrols Initiated in the Strait of Malacca Amid Shipping Fears',
     slug: 'trilateral-patrols-initiated-strait-malacca',
-    body: 'Singapore, Malaysia, and Indonesia have launched a series of joint naval exercises in the Strait of Malacca. The initiative, codenamed Operation Malacca Shield, is designed to deter piracy and address insurance premium surges. Insurance giants in London have recently classified the channel as a high-risk zone, causing maritime transport firms to demand state-backed escorts.',
+    body: 'Singapore, Malaysia, and Indonesia have launched a series of joint naval exercises in the Strait of Malacca. The initiative, codenamed Operation Malacca Shield, is designed to deter piracy and address piracy and insurance premium surges. Insurance giants in London have recently classified the channel as a high-risk zone, causing maritime transport firms to demand state-backed escorts.',
     category: 'geopolitics',
     publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
@@ -177,6 +250,8 @@ const mockArticles: any[] = [
     narrativeId: 'narrative-1',
     narrative: mockNarrative,
     stanceAxis: { left: 'Stabilizes Shipping', right: 'Heightens Regional Tensions' },
+    categoryImageId: 'cat-img-geopolitics',
+    categoryImage: mockCategoryImages['geopolitics'],
     entities: [
       { id: 'ae-3-1', startOffset: 0, endOffset: 9, entityId: 'entity-singapore', entity: mockEntities[6] },
       { id: 'ae-3-2', startOffset: 104, endOffset: 121, entityId: 'entity-malacca-strait', entity: mockEntities[7] },
@@ -200,12 +275,10 @@ async function checkDbConnection(): Promise<boolean> {
     return false;
   }
   try {
-    // Quick test query
     await prisma.$queryRaw`SELECT 1`;
     isDbActive = true;
     return true;
   } catch (e) {
-    console.warn('Database connection failed, falling back to mock memory database.', e);
     isDbActive = false;
     return false;
   }
@@ -219,6 +292,7 @@ export async function getArticles() {
         orderBy: { publishedAt: 'desc' },
         include: {
           narrative: true,
+          categoryImage: true,
         },
       });
     } catch (e) {
@@ -237,6 +311,8 @@ export async function getArticles() {
     narrativeId: a.narrativeId,
     narrative: a.narrative,
     stanceAxis: a.stanceAxis,
+    categoryImageId: a.categoryImageId,
+    categoryImage: a.categoryImage,
   }));
 }
 
@@ -247,6 +323,7 @@ export async function getArticleBySlug(slug: string) {
       const article = await prisma.article.findUnique({
         where: { slug },
         include: {
+          categoryImage: true,
           narrative: {
             include: {
               articles: {
@@ -320,7 +397,6 @@ export async function recordStanceVote(articleId: string, value: number, session
   const dbConnected = await checkDbConnection();
   if (dbConnected) {
     try {
-      // Check if session has already voted on this article
       const existingVote = await prisma.stanceVote.findFirst({
         where: {
           articleId,
@@ -328,13 +404,11 @@ export async function recordStanceVote(articleId: string, value: number, session
         },
       });
       if (existingVote) {
-        // Update their vote
         return await prisma.stanceVote.update({
           where: { id: existingVote.id },
           data: { value },
         });
       } else {
-        // Create new vote
         return await prisma.stanceVote.create({
           data: {
             articleId,
@@ -348,11 +422,9 @@ export async function recordStanceVote(articleId: string, value: number, session
     }
   }
 
-  // Fallback to mock in-memory database
   if (!mockStanceVotes[articleId]) {
     mockStanceVotes[articleId] = [];
   }
-  // Simply push the vote. For real prototype usage, we can replace or append.
   mockStanceVotes[articleId].push(value);
   return { id: `mock-vote-${Date.now()}`, articleId, value, sessionId };
 }
@@ -376,10 +448,12 @@ export async function saveArticle(data: {
     mentions: Array<{ startOffset: number; endOffset: number }>;
   }>;
 }) {
+  // 1. Resolve Category Image (via Unsplash API or fallback)
+  const catImg = await resolveCategoryImage(data.category);
+
   const dbConnected = await checkDbConnection();
   if (dbConnected) {
     try {
-      // Check if article slug already exists
       const existing = await prisma.article.findUnique({
         where: { slug: data.slug },
       });
@@ -387,8 +461,23 @@ export async function saveArticle(data: {
         throw new Error(`Article with slug ${data.slug} already exists.`);
       }
 
-      // Start transaction
       return await prisma.$transaction(async (tx) => {
+        // Resolve or create category image record
+        let dbCatImg = await tx.categoryImage.findUnique({
+          where: { category: data.category },
+        });
+
+        if (!dbCatImg) {
+          dbCatImg = await tx.categoryImage.create({
+            data: {
+              category: data.category,
+              imageUrl: catImg.imageUrl,
+              photographerName: catImg.photographerName,
+              photographerUrl: catImg.photographerUrl,
+            },
+          });
+        }
+
         const article = await tx.article.create({
           data: {
             headline: data.headline,
@@ -398,11 +487,14 @@ export async function saveArticle(data: {
             sourceUrl: data.sourceUrl,
             publishedAt: data.publishedAt,
             stanceAxis: data.stanceAxis,
+            categoryImageId: dbCatImg.id,
           },
         });
 
         for (const ent of data.entities) {
-          // Resolve or create entity
+          // Resolve entity image (via Wikidata API or fallback)
+          const entImg = await resolveEntityImage(ent.name);
+
           let entityRecord = await tx.entity.findUnique({
             where: { name: ent.name },
           });
@@ -416,11 +508,23 @@ export async function saveArticle(data: {
                 certainty: ent.certainty,
                 whyNow: ent.whyNow,
                 stakeholders: ent.stakeholders,
+                imageUrl: entImg.imageUrl,
+                imageSource: entImg.imageSource,
+                imageFetchedAt: new Date(),
+              },
+            });
+          } else if (!entityRecord.imageUrl && entityRecord.imageSource !== 'none') {
+            // Update entity image if it was previously missing
+            entityRecord = await tx.entity.update({
+              where: { id: entityRecord.id },
+              data: {
+                imageUrl: entImg.imageUrl,
+                imageSource: entImg.imageSource,
+                imageFetchedAt: new Date(),
               },
             });
           }
 
-          // Create mentions
           for (const mention of ent.mentions) {
             await tx.articleEntity.create({
               data: {
@@ -442,40 +546,54 @@ export async function saveArticle(data: {
 
   // Fallback save to mock memory
   const newId = `article-${mockArticles.length + 1}`;
-  const mockEntitiesToAdd = data.entities.map((e, index) => ({
-    id: `entity-${e.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
-    name: e.name,
-    aliases: e.aliases,
-    oneLiner: e.oneLiner,
-    certainty: e.certainty,
-    whyNow: e.whyNow,
-    stakeholders: e.stakeholders,
-  }));
 
-  // Add new entities to mockEntities if they don't exist
-  mockEntitiesToAdd.forEach(me => {
-    if (!mockEntities.some(e => e.name === me.name)) {
-      mockEntities.push(me);
-    }
-  });
-
-  const resolvedEntities = data.entities.map(e => {
-    const matched = mockEntities.find(me => me.name === e.name);
-    return {
-      entity: matched!,
-      mentions: e.mentions,
+  // Build the category image in memory
+  let memoryCatImg = mockCategoryImages[data.category];
+  if (!memoryCatImg) {
+    memoryCatImg = {
+      id: `cat-img-${data.category}`,
+      category: data.category,
+      imageUrl: catImg.imageUrl,
+      photographerName: catImg.photographerName,
+      photographerUrl: catImg.photographerUrl,
+      fetchedAt: new Date(),
     };
-  });
+    mockCategoryImages[data.category] = memoryCatImg;
+  }
+
+  const resolvedEntities = [];
+  for (const e of data.entities) {
+    let matched = mockEntities.find(me => me.name === e.name);
+    if (!matched) {
+      // Resolve entity image
+      const entImg = await resolveEntityImage(e.name);
+      matched = {
+        id: `entity-${e.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+        name: e.name,
+        aliases: e.aliases,
+        oneLiner: e.oneLiner,
+        certainty: e.certainty,
+        whyNow: e.whyNow,
+        stakeholders: e.stakeholders,
+        imageUrl: entImg.imageUrl,
+        imageSource: entImg.imageSource,
+        imageFetchedAt: new Date(),
+      };
+      mockEntities.push(matched);
+    }
+    resolvedEntities.push(matched);
+  }
 
   const relationEntities: any[] = [];
-  resolvedEntities.forEach((re, index) => {
-    re.mentions.forEach((m, mIdx) => {
+  data.entities.forEach((ent, index) => {
+    const matched = mockEntities.find(me => me.name === ent.name);
+    ent.mentions.forEach((m, mIdx) => {
       relationEntities.push({
         id: `ae-${newId}-${index}-${mIdx}`,
         startOffset: m.startOffset,
         endOffset: m.endOffset,
-        entityId: re.entity.id,
-        entity: re.entity,
+        entityId: matched!.id,
+        entity: matched!,
       });
     });
   });
@@ -492,6 +610,8 @@ export async function saveArticle(data: {
     narrativeId: null,
     narrative: null,
     stanceAxis: data.stanceAxis,
+    categoryImageId: memoryCatImg.id,
+    categoryImage: memoryCatImg,
     entities: relationEntities,
   };
 

@@ -7,31 +7,36 @@ generator client {
 }
 
 model Article {
-  id            String          @id @default(cuid())
-  headline      String
-  slug          String          @unique
-  body          String          @db.Text
-  category      String          // e.g. "geopolitics", "domestic-politics"
-  sourceUrl     String?
-  publishedAt   DateTime
-  createdAt     DateTime        @default(now())
-  entities      ArticleEntity[]
-  narrativeId   String?
-  narrative     NarrativeThread? @relation(fields: [narrativeId], references: [id])
-  stanceAxis    Json?           // e.g. { left: "De-escalates", right: "Escalates" }
-  stanceVotes   StanceVote[]
+  id              String          @id @default(cuid())
+  headline        String
+  slug            String          @unique
+  body            String          @db.Text
+  category        String          // e.g. "geopolitics", "domestic-politics"
+  sourceUrl       String?
+  publishedAt     DateTime
+  createdAt       DateTime        @default(now())
+  entities        ArticleEntity[]
+  narrativeId     String?
+  narrative       NarrativeThread? @relation(fields: [narrativeId], references: [id])
+  stanceAxis      Json?           // e.g. { left: "De-escalates", right: "Escalates" }
+  stanceVotes     StanceVote[]
+  categoryImageId String?
+  categoryImage   CategoryImage? @relation(fields: [categoryImageId], references: [id])
 }
 
 model Entity {
-  id            String          @id @default(cuid())
-  name          String          @unique   // canonical name, e.g. "NATO"
-  aliases       String[]                  // alternate surface forms for matching
-  oneLiner      String
-  certainty     String                    // confirmed | official | analysis | speculation
-  whyNow        String[]                  // ordered bullet points
-  stakeholders  Json                      // [{ name, wants }]
-  updatedAt     DateTime        @updatedAt
-  articles      ArticleEntity[]
+  id             String          @id @default(cuid())
+  name           String          @unique   // canonical name, e.g. "NATO"
+  aliases        String[]                  // alternate surface forms for matching
+  oneLiner       String
+  certainty      String                    // confirmed | official | analysis | speculation
+  whyNow         String[]                  // ordered bullet points
+  stakeholders   Json                      // [{ name, wants }]
+  imageUrl       String?
+  imageSource    String?                   // "wikidata" | "wikimedia" | "none"
+  imageFetchedAt DateTime?
+  updatedAt      DateTime        @updatedAt
+  articles       ArticleEntity[]
 }
 
 model ArticleEntity {
@@ -59,4 +64,14 @@ model StanceVote {
   value         Int                       // 0-100
   sessionId     String                    // anonymous session hash, not user account
   createdAt     DateTime        @default(now())
+}
+
+model CategoryImage {
+  id               String          @id @default(cuid())
+  category         String          @unique
+  imageUrl         String
+  photographerName String
+  photographerUrl  String
+  fetchedAt        DateTime        @default(now())
+  articles         Article[]
 }

@@ -25,6 +25,23 @@ export default async function ArticlePage({ params }: PageProps) {
     ...article,
     publishedAt: article.publishedAt instanceof Date ? article.publishedAt.toISOString() : article.publishedAt,
     createdAt: article.createdAt instanceof Date ? article.createdAt.toISOString() : article.createdAt,
+    categoryImage: article.categoryImage
+      ? {
+          ...article.categoryImage,
+          fetchedAt: article.categoryImage.fetchedAt instanceof Date 
+            ? article.categoryImage.fetchedAt.toISOString() 
+            : article.categoryImage.fetchedAt,
+        }
+      : null,
+    entities: article.entities.map((mention: any) => ({
+      ...mention,
+      entity: {
+        ...mention.entity,
+        imageFetchedAt: mention.entity.imageFetchedAt instanceof Date 
+          ? mention.entity.imageFetchedAt.toISOString() 
+          : mention.entity.imageFetchedAt,
+      }
+    })),
     narrative: article.narrative
       ? {
           ...article.narrative,

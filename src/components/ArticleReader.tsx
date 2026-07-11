@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, X, Shield, Activity, AlertCircle, HelpCircle, 
-  MapPin, HelpCircle as SpeculationIcon 
+  ArrowLeft, X, Shield, Activity, AlertCircle, HelpCircle
 } from 'lucide-react';
 
 interface Entity {
@@ -15,6 +14,8 @@ interface Entity {
   certainty: string;
   whyNow: string[];
   stakeholders: any; // Array of { name, wants }
+  imageUrl?: string | null;
+  imageSource?: string | null;
 }
 
 interface Mention {
@@ -35,6 +36,14 @@ interface Article {
   sourceUrl: string | null;
   narrativeId: string | null;
   stanceAxis: any; // { left: string, right: string }
+  categoryImageId?: string | null;
+  categoryImage?: {
+    id: string;
+    category: string;
+    imageUrl: string;
+    photographerName: string;
+    photographerUrl: string;
+  } | null;
   narrative?: {
     id: string;
     title: string;
@@ -270,6 +279,45 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Article content (cols 1 & 2) */}
         <article className="lg:col-span-2 space-y-6">
+          {/* Category Header Image (Unsplash) */}
+          {article.categoryImage && (
+            <div className="w-full mb-6">
+              <div className="relative w-full aspect-[21/9] rounded-lg overflow-hidden border border-ink/10 shadow-sm bg-paper/20">
+                <img 
+                  src={article.categoryImage.imageUrl} 
+                  alt={`${article.category} banner`}
+                  className="w-full h-full object-cover grayscale-10 contrast-105"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-paper/30 to-transparent" />
+              </div>
+              <div className="mt-2 text-right">
+                <span className="font-mono text-[9px] text-ink/40 uppercase tracking-wider">
+                  Photo via{' '}
+                  <a 
+                    href={article.categoryImage.photographerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-wax transition-colors"
+                  >
+                    {article.categoryImage.photographerName}
+                  </a>{' '}
+                  on{' '}
+                  <a 
+                    href="https://unsplash.com/?utm_source=ravense&utm_medium=referral"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-wax transition-colors"
+                  >
+                    Unsplash
+                  </a>
+                </span>
+              </div>
+            </div>
+          )}
+
           <header className="space-y-4">
             <div className="flex flex-wrap items-center gap-4">
               <span className="font-mono text-xs uppercase tracking-wider text-wax font-medium bg-wax/5 px-2 py-0.5 rounded border border-wax/10">
@@ -317,18 +365,32 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
                 <X className="w-4 h-4" />
               </button>
 
-              {/* Title */}
-              <div>
-                <span className="font-mono text-[9px] uppercase tracking-widest text-ink/40 block mb-1">
-                  Entity Profile
-                </span>
-                <h4 className="font-serif text-2xl font-bold text-ink pr-6 leading-none">
-                  {selectedEntity.name}
-                </h4>
-                {selectedEntity.aliases.length > 0 && (
-                  <span className="font-mono text-[10px] text-ink/50 block mt-1">
-                    Aliases: {selectedEntity.aliases.join(', ')}
+              {/* Title & Image Flex */}
+              <div className="flex gap-4 items-start justify-between pr-6">
+                <div className="flex-1">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-ink/40 block mb-1">
+                    Entity Profile
                   </span>
+                  <h4 className="font-serif text-2xl font-bold text-ink leading-tight">
+                    {selectedEntity.name}
+                  </h4>
+                  {selectedEntity.aliases.length > 0 && (
+                    <span className="font-mono text-[10px] text-ink/50 block mt-1">
+                      Aliases: {selectedEntity.aliases.join(', ')}
+                    </span>
+                  )}
+                </div>
+                {selectedEntity.imageUrl && selectedEntity.imageSource !== 'none' && (
+                  <div className="w-16 h-16 rounded border border-ink/10 overflow-hidden shrink-0 shadow-sm bg-paper/20">
+                    <img 
+                      src={selectedEntity.imageUrl} 
+                      alt={selectedEntity.name} 
+                      className="w-full h-full object-cover grayscale-10 contrast-105"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
                 )}
               </div>
 
