@@ -1,3 +1,5 @@
+import { CATEGORY_QUERY_MAP, CategoryKey } from './categories';
+
 const USER_AGENT = 'Ravense/0.1 (student project; contact: eklavya434@gmail.com)';
 
 // Wikidata entity image resolution
@@ -51,41 +53,32 @@ export async function resolveEntityImage(entityName: string): Promise<{
   }
 }
 
-// Unsplash category query mapping
-const CATEGORY_QUERY_MAP: Record<string, string> = {
-  "geopolitics": "world map diplomacy",
-  "domestic-politics": "parliament government building",
-  "economy": "stock exchange finance",
-  "macroeconomics": "stock exchange finance",
-  "security": "patrol military surveillance"
-};
-
 // High-quality local fallbacks if Unsplash API key is missing or query fails
-const FALLBACK_CATEGORY_IMAGES: Record<string, { imageUrl: string; photographerName: string; photographerUrl: string }> = {
+const FALLBACK_CATEGORY_IMAGES: Record<CategoryKey, { imageUrl: string; photographerName: string; photographerUrl: string }> = {
   "geopolitics": {
     imageUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80",
     photographerName: "Joakim Honkasalo",
     photographerUrl: "https://unsplash.com/@jhonkasalo"
   },
-  "domestic-politics": {
+  "national": {
     imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
     photographerName: "Kyle Glenn",
     photographerUrl: "https://unsplash.com/@kyleglenn"
   },
-  "economy": {
+  "business": {
     imageUrl: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=80",
     photographerName: "M. B. M.",
     photographerUrl: "https://unsplash.com/@mbm"
   },
-  "macroeconomics": {
-    imageUrl: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=80",
-    photographerName: "M. B. M.",
-    photographerUrl: "https://unsplash.com/@mbm"
+  "sports": {
+    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80",
+    photographerName: "Conor Luddy",
+    photographerUrl: "https://unsplash.com/@conorluddy"
   },
-  "security": {
-    imageUrl: "https://images.unsplash.com/photo-1508847154043-be12a62861c1?auto=format&fit=crop&w=1200&q=80",
-    photographerName: "Sven-Erik Arndt",
-    photographerUrl: "https://unsplash.com/@sven-erik-arndt"
+  "entertainment": {
+    imageUrl: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1200&q=80",
+    photographerName: "Krists Luhaers",
+    photographerUrl: "https://unsplash.com/@krists"
   }
 };
 
@@ -94,7 +87,7 @@ export async function resolveCategoryImage(category: string): Promise<{
   photographerName: string;
   photographerUrl: string;
 }> {
-  const normCategory = category.toLowerCase();
+  const normCategory = category.toLowerCase() as CategoryKey;
   const query = CATEGORY_QUERY_MAP[normCategory] || "news journalism";
   const fallback = FALLBACK_CATEGORY_IMAGES[normCategory] || {
     imageUrl: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80",

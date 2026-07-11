@@ -1,4 +1,5 @@
 import { prisma } from './db';
+import { Category } from '@prisma/client';
 import { resolveEntityImage, resolveCategoryImage } from './images';
 
 // In-memory mock CategoryImages
@@ -461,16 +462,18 @@ export async function saveArticle(data: {
         throw new Error(`Article with slug ${data.slug} already exists.`);
       }
 
+      const categoryEnum = data.category as Category;
+
       return await prisma.$transaction(async (tx) => {
         // Resolve or create category image record
         let dbCatImg = await tx.categoryImage.findUnique({
-          where: { category: data.category },
+          where: { category: categoryEnum },
         });
 
         if (!dbCatImg) {
           dbCatImg = await tx.categoryImage.create({
             data: {
-              category: data.category,
+              category: categoryEnum,
               imageUrl: catImg.imageUrl,
               photographerName: catImg.photographerName,
               photographerUrl: catImg.photographerUrl,
@@ -483,7 +486,7 @@ export async function saveArticle(data: {
             headline: data.headline,
             slug: data.slug,
             body: data.body,
-            category: data.category,
+            category: categoryEnum,
             sourceUrl: data.sourceUrl,
             publishedAt: data.publishedAt,
             stanceAxis: data.stanceAxis,

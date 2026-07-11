@@ -6,12 +6,20 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Category {
+  geopolitics
+  national
+  business
+  sports
+  entertainment
+}
+
 model Article {
   id              String          @id @default(cuid())
   headline        String
   slug            String          @unique
   body            String          @db.Text
-  category        String          // e.g. "geopolitics", "domestic-politics"
+  category        Category
   sourceUrl       String?
   publishedAt     DateTime
   createdAt       DateTime        @default(now())
@@ -68,7 +76,7 @@ model StanceVote {
 
 model CategoryImage {
   id               String          @id @default(cuid())
-  category         String          @unique
+  category         Category        @unique
   imageUrl         String
   photographerName String
   photographerUrl  String

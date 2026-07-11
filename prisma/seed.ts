@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Category } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -8,14 +8,16 @@ async function main() {
   await prisma.articleEntity.deleteMany();
   await prisma.article.deleteMany();
   await prisma.entity.deleteMany();
+  await prisma.categoryImage.deleteMany();
   await prisma.narrativeThread.deleteMany();
 
   console.log('Seeding narrative thread...');
   const narrative = await prisma.narrativeThread.create({
+    key: 'narrative-global-2026',
     data: {
       title: 'Global Maritime & Border Security Summit 2026',
     },
-  });
+  } as any);
 
   console.log('Seeding entities...');
   const nato = await prisma.entity.create({
@@ -52,241 +54,209 @@ async function main() {
     }
   });
 
-  const mediterranean = await prisma.entity.create({
+  const parliament = await prisma.entity.create({
     data: {
-      name: 'Mediterranean',
-      aliases: ['Mediterranean coast', 'Mediterranean Security'],
-      oneLiner: 'An intercontinental sea stretching from the Atlantic Ocean to Asia, key to global shipping and security.',
-      certainty: 'confirmed',
-      whyNow: [
-        'Increasing naval deployments by non-regional actors.',
-        'Escalating migration and border surveillance efforts.'
-      ],
-      stakeholders: [
-        { name: 'European Union', wants: 'Secured maritime borders and stable migration management' }
-      ]
-    }
-  });
-
-  const arcticCouncil = await prisma.entity.create({
-    data: {
-      name: 'Arctic Council',
-      aliases: ['Council'],
-      oneLiner: 'A high-level intergovernmental forum that addresses issues faced by the Arctic governments and indigenous peoples.',
+      name: 'Indian Parliament',
+      aliases: ['Parliament'],
+      oneLiner: 'The supreme legislative body of the Republic of India, responsible for passing laws and policies.',
       certainty: 'official statement',
       whyNow: [
-        'Tromsø summit marks first high-level meeting since recent chair rotation.',
-        'Opening of new shipping lanes due to record ice melts.',
-        'Unilateral claims on extended continental shelves.'
+        'Debating digital personal data legislation amendments.',
+        'Heightened debate over compliance rules for early-stage companies.'
       ],
       stakeholders: [
-        { name: 'Norway', wants: 'Successful chairmanship and preservation of diplomatic channel' },
-        { name: 'Russia', wants: 'Unrestricted navigation and mineral exploration rights in its economic zone' },
-        { name: 'United States', wants: 'Stricter environmental regulations and limitation of foreign military presence' }
+        { name: 'Tech Advocates', wants: 'Fewer regulatory hurdles and clear compliance maps for startups' }
       ]
     }
   });
 
-  const tromso = await prisma.entity.create({
+  const nasdaq = await prisma.entity.create({
     data: {
-      name: 'Tromsø',
-      aliases: ['Tromsø, Norway'],
-      oneLiner: 'A city in northern Norway, known as a major cultural and scientific hub in the Arctic Circle.',
+      name: 'NASDAQ',
+      aliases: ['NASDAQ exchange'],
+      oneLiner: 'An American stock exchange, the second-largest exchange in the world by market capitalization.',
       certainty: 'confirmed',
       whyNow: [
-        'Hosting the Arctic Council ministerial summit.',
-        'Location of key polar research and monitoring facilities.'
+        'Registering record-high technology investments.',
+        'Signals automation shifts across global manufacturing firms.'
       ],
       stakeholders: [
-        { name: 'Arctic Council Secretariat', wants: 'Smooth execution of diplomatic proceedings' }
+        { name: 'Financial Analysts', wants: 'Prevention of valuation bubbles while scaling up automation' }
       ]
     }
   });
 
-  const norway = await prisma.entity.create({
+  const wembley = await prisma.entity.create({
     data: {
-      name: 'Norway',
-      aliases: ['Norwegian'],
-      oneLiner: 'A Nordic country in Northern Europe, currently holding the chair of the Arctic Council.',
+      name: 'Wembley Stadium',
+      aliases: ['Wembley'],
+      oneLiner: 'A premier national sports stadium in Wembley, London, which opened in 2007, hosting major football and athletic events.',
       certainty: 'confirmed',
       whyNow: [
-        'Steering diplomatic negotiations amidst heightened geopolitical tensions.',
-        'Balancing environmental protection with domestic oil and gas interests.'
+        'Hosting the championship final and witnessing historic underdog wins.',
+        'Central stage for European domestic sport events.'
       ],
       stakeholders: [
-        { name: 'Norway State', wants: 'Retention of regional stability and stable gas exports to Europe' }
+        { name: 'Coaching Staff', wants: 'Winning titles by deploying innovative tactical shifts' }
       ]
     }
   });
 
-  const singapore = await prisma.entity.create({
+  const cannes = await prisma.entity.create({
     data: {
-      name: 'Singapore',
-      aliases: [],
-      oneLiner: 'A sovereign island country and city-state in maritime Southeast Asia, major global financial and shipping hub.',
-      certainty: 'confirmed',
+      name: 'Cannes Film Festival',
+      aliases: ['Cannes'],
+      oneLiner: 'An annual film festival held in Cannes, France, which previews new films of all genres, including documentaries.',
+      certainty: 'official statement',
       whyNow: [
-        'Launches joint naval patrol with neighbors.',
-        'Rising shipping insurance costs threaten its port revenues.'
+        'Unveiling the independent cinema lineup for this season.',
+        'Promoting diverse narrative formats over mainstream releases.'
       ],
       stakeholders: [
-        { name: 'Port Authority of Singapore', wants: 'Uninterrupted flow of commercial shipping vessels through the strait' }
+        { name: 'Film Curators', wants: 'Inclusion of innovative directors and independent film features' }
       ]
     }
   });
 
-  const malaccaStrait = await prisma.entity.create({
+  console.log('Seeding CategoryImages...');
+  // Geopolitics Category Image
+  const imgGeo = await prisma.categoryImage.create({
     data: {
-      name: 'Strait of Malacca',
-      aliases: ['channel'],
-      oneLiner: 'A narrow stretch of water between the Malay Peninsula and the Indonesian island of Sumatra, one of the world\'s most critical shipping lanes.',
-      certainty: 'confirmed',
-      whyNow: [
-        'Recent spike in maritime security incidents and piracy reports.',
-        'Surge in shipping insurance premiums for vessels crossing the strait.'
-      ],
-      stakeholders: [
-        { name: 'International Shipping Association', wants: 'Enhanced security and reduction of insurance risk premiums' },
-        { name: 'Indonesia & Malaysia', wants: 'Maintenance of sovereignty over the waters while securing trade routes' }
-      ]
+      category: Category.geopolitics,
+      imageUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80",
+      photographerName: "Joakim Honkasalo",
+      photographerUrl: "https://unsplash.com/@jhonkasalo"
+    }
+  });
+  
+  // National Category Image
+  const imgNat = await prisma.categoryImage.create({
+    data: {
+      category: Category.national,
+      imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
+      photographerName: "Kyle Glenn",
+      photographerUrl: "https://unsplash.com/@kyleglenn"
+    }
+  });
+
+  // Business Category Image
+  const imgBus = await prisma.categoryImage.create({
+    data: {
+      category: Category.business,
+      imageUrl: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=80",
+      photographerName: "M. B. M.",
+      photographerUrl: "https://unsplash.com/@mbm"
+    }
+  });
+
+  // Sports Category Image
+  const imgSpo = await prisma.categoryImage.create({
+    data: {
+      category: Category.sports,
+      imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80",
+      photographerName: "Conor Luddy",
+      photographerUrl: "https://unsplash.com/@conorluddy"
+    }
+  });
+
+  // Entertainment Category Image
+  const imgEnt = await prisma.categoryImage.create({
+    data: {
+      category: Category.entertainment,
+      imageUrl: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1200&q=80",
+      photographerName: "Krists Luhaers",
+      photographerUrl: "https://unsplash.com/@krists"
     }
   });
 
   console.log('Seeding articles...');
 
-  // Article 1
-  const body1 = "Ministers from NATO gathered in Antalya, Turkey, this week to discuss regional stability and security cooperation. The conference, hosted by Turkish diplomats, aims to resolve disputes over maritime borders in the Mediterranean. Officials from the Alliance stated that the summit serves as a crucial platform to reinforce the security framework in Eastern Europe and the Middle East.";
+  // 1. Geopolitics
+  const body1 = "Ministers from NATO gathered in Antalya, Turkey, this week to discuss regional stability and security cooperation. The conference, hosted by Turkish diplomats, aims to resolve disputes over maritime borders in the Mediterranean.";
   const art1 = await prisma.article.create({
     data: {
       headline: 'NATO Ministers Convene in Antalya to Address Mediterranean Security Concerns',
       slug: 'nato-ministers-convene-antalya-mediterranean',
       body: body1,
-      category: 'geopolitics',
+      category: Category.geopolitics,
       publishedAt: new Date(),
-      narrativeId: narrative.id,
       stanceAxis: { left: 'De-escalates', right: 'Escalates' },
+      categoryImageId: imgGeo.id,
     },
+  });
+  await prisma.articleEntity.create({
+    data: { articleId: art1.id, entityId: nato.id, startOffset: 15, endOffset: 19 },
+  });
+  await prisma.articleEntity.create({
+    data: { articleId: art1.id, entityId: antalya.id, startOffset: 32, endOffset: 39 },
   });
 
-  // Connect entities for Article 1
-  // "NATO": 15 to 19
-  await prisma.articleEntity.create({
-    data: {
-      articleId: art1.id,
-      entityId: nato.id,
-      startOffset: 15,
-      endOffset: 19,
-    },
-  });
-  // "Antalya": 32 to 39
-  await prisma.articleEntity.create({
-    data: {
-      articleId: art1.id,
-      entityId: antalya.id,
-      startOffset: 32,
-      endOffset: 39,
-    },
-  });
-  // "Mediterranean": 188 to 201
-  await prisma.articleEntity.create({
-    data: {
-      articleId: art1.id,
-      entityId: mediterranean.id,
-      startOffset: 188,
-      endOffset: 201,
-    },
-  });
-  // "Alliance" (alias of NATO): 221 to 229
-  await prisma.articleEntity.create({
-    data: {
-      articleId: art1.id,
-      entityId: nato.id,
-      startOffset: 221,
-      endOffset: 229,
-    },
-  });
-
-  // Article 2
-  const body2 = "The Arctic Council meeting in Tromsø concluded yesterday without a joint statement, highlighting deep disagreements over mineral exploration. Norway, representing the current chair, attempted to broker a compromise on resource extraction boundaries, but representatives from Russia and the United States remained divided on environmental regulations. Observers note that the failure to reach consensus signals a growing militarization and economic rivalry in the polar region.";
+  // 2. National
+  const body2 = "New Delhi — The Indian Parliament debated amendments to the Digital Personal Data Protection Act. Officials stated the revisions aim to streamline compliance for startups.";
   const art2 = await prisma.article.create({
     data: {
-      headline: 'Arctic Council Deadlock: Tromsø Summit Ends Without Accord',
-      slug: 'arctic-council-deadlock-tromso-summit-fails',
+      headline: 'Indian Parliament Proposes Digital Personal Data Protection Act Amendments',
+      slug: 'indian-parliament-proposes-data-act-amendments',
       body: body2,
-      category: 'geopolitics',
-      publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-      stanceAxis: { left: 'Diplomatic De-escalation', right: 'Militarization/Conflict' },
+      category: Category.national,
+      publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      stanceAxis: { left: 'Positive for the public', right: 'Concerning for the public' },
+      categoryImageId: imgNat.id,
     },
+  });
+  await prisma.articleEntity.create({
+    data: { articleId: art2.id, entityId: parliament.id, startOffset: 16, endOffset: 33 },
   });
 
-  // "Arctic Council": 4 to 18
-  await prisma.articleEntity.create({
-    data: {
-      articleId: art2.id,
-      entityId: arcticCouncil.id,
-      startOffset: 4,
-      endOffset: 18,
-    },
-  });
-  // "Tromsø": 30 to 36
-  await prisma.articleEntity.create({
-    data: {
-      articleId: art2.id,
-      entityId: tromso.id,
-      startOffset: 30,
-      endOffset: 36,
-    },
-  });
-  // "Norway": 105 to 111
-  await prisma.articleEntity.create({
-    data: {
-      articleId: art2.id,
-      entityId: norway.id,
-      startOffset: 105,
-      endOffset: 111,
-    },
-  });
-
-  // Article 3
-  const body3 = "Singapore, Malaysia, and Indonesia have launched a series of joint naval exercises in the Strait of Malacca. The initiative, codenamed Operation Malacca Shield, is designed to deter piracy and address insurance premium surges. Insurance giants in London have recently classified the channel as a high-risk zone, causing maritime transport firms to demand state-backed escorts.";
+  // 3. Business
+  const body3 = "Silicon Valley — Tech firms at the NASDAQ stock exchange registered record-high investments, signaling a major automation shift.";
   const art3 = await prisma.article.create({
     data: {
-      headline: 'Trilateral Patrols Initiated in the Strait of Malacca Amid Shipping Fears',
-      slug: 'trilateral-patrols-initiated-strait-malacca',
+      headline: 'Global Markets Recoil as Tech Influx Signals Automation Shift',
+      slug: 'global-markets-recoil-tech-influx-automation',
       body: body3,
-      category: 'geopolitics',
-      publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-      narrativeId: narrative.id,
-      stanceAxis: { left: 'Stabilizes Shipping', right: 'Heightens Regional Tensions' },
+      category: Category.business,
+      publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      stanceAxis: { left: 'Bearish', right: 'Bullish' },
+      categoryImageId: imgBus.id,
     },
+  });
+  await prisma.articleEntity.create({
+    data: { articleId: art3.id, entityId: nasdaq.id, startOffset: 23, endOffset: 29 },
   });
 
-  // "Singapore": 0 to 9
-  await prisma.articleEntity.create({
+  // 4. Sports
+  const body4 = "London — The Wembley Stadium final ended in a historic victory yesterday, defying predictions from sports analysts.";
+  const art4 = await prisma.article.create({
     data: {
-      articleId: art3.id,
-      entityId: singapore.id,
-      startOffset: 0,
-      endOffset: 9,
+      headline: 'Championship Final: Underdog Victory Stuns Wembley Stadium Crowd',
+      slug: 'championship-final-underdog-victory-wembley',
+      body: body4,
+      category: Category.sports,
+      publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      stanceAxis: { left: 'Underdog wins', right: 'Favorite wins' },
+      categoryImageId: imgSpo.id,
     },
   });
-  // "Strait of Malacca": 104 to 121
   await prisma.articleEntity.create({
+    data: { articleId: art4.id, entityId: wembley.id, startOffset: 13, endOffset: 28 },
+  });
+
+  // 5. Entertainment
+  const body5 = "Cannes — Directors at the Cannes Film Festival unveiled the independent films lineup, signaling departures from mainstream releases.";
+  const art5 = await prisma.article.create({
     data: {
-      articleId: art3.id,
-      entityId: malaccaStrait.id,
-      startOffset: 104,
-      endOffset: 121,
+      headline: 'Cannes Film Festival Announces Groundbreaking Independent Stage Lineup',
+      slug: 'cannes-film-festival-announces-independent-lineup',
+      body: body5,
+      category: Category.entertainment,
+      publishedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+      stanceAxis: { left: 'Underwhelming', right: 'Lives up to the hype' },
+      categoryImageId: imgEnt.id,
     },
   });
-  // "channel" (alias of Strait of Malacca): 217 to 224
   await prisma.articleEntity.create({
-    data: {
-      articleId: art3.id,
-      entityId: malaccaStrait.id,
-      startOffset: 217,
-      endOffset: 224,
-    },
+    data: { articleId: art5.id, entityId: cannes.id, startOffset: 20, endOffset: 41 },
   });
 
   console.log('Seeding completed successfully!');
