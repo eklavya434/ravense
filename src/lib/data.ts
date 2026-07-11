@@ -584,7 +584,7 @@ const mockNarratives = [
 let isDbActive = false;
 
 async function checkDbConnection(): Promise<boolean> {
-  if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes('localhost:5432/ravense')) {
+  if (!process.env.DATABASE_URL) {
     return false;
   }
   try {
