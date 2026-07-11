@@ -194,19 +194,162 @@ const mockEntities: any[] = [
     imageUrl: null,
     imageSource: 'none',
     imageFetchedAt: null
+  },
+  {
+    id: 'entity-parliament',
+    name: 'Parliament',
+    aliases: ['Parliament of India', 'Lok Sabha'],
+    oneLiner: 'The supreme legislative body of the Republic of India, comprising the President and two houses.',
+    certainty: 'confirmed',
+    whyNow: [
+      'Debating crucial updates regarding data security and technology startup guidelines.',
+      'Upcoming winter session scheduled to address federal resource budgets.'
+    ],
+    stakeholders: [
+      { name: 'Indian Citizens', wants: 'Robust personal data privacy safeguards and national cybersecurity' }
+    ],
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Parliament_House_New_Delhi.jpg/400px-Parliament_House_New_Delhi.jpg',
+    imageSource: 'wikidata',
+    imageFetchedAt: new Date()
+  },
+  {
+    id: 'entity-nasdaq',
+    name: 'NASDAQ',
+    aliases: ['NASDAQ stock exchange'],
+    oneLiner: 'An American stock exchange based in New York City, the second-largest exchange in the world by market capitalization.',
+    certainty: 'confirmed',
+    whyNow: [
+      'Surge in automated trading index volumes signals tech sector rally.',
+      'Increased scrutiny on high-frequency trading algorithm guidelines.'
+    ],
+    stakeholders: [
+      { name: 'Tech Corporations', wants: 'Access to investment capital and stable market liquidity' }
+    ],
+    imageUrl: null,
+    imageSource: 'none',
+    imageFetchedAt: null
+  },
+  {
+    id: 'entity-wembley',
+    name: 'Wembley',
+    aliases: ['Wembley Stadium'],
+    oneLiner: 'A historic sports stadium in London, England, serving as the home of English association football.',
+    certainty: 'confirmed',
+    whyNow: [
+      'Hosting major tournament finals generating high international broadcast volumes.',
+      'Renovations planned to expand viewer capacity and transit infrastructure.'
+    ],
+    stakeholders: [
+      { name: 'Football Association', wants: 'Maximizing gate revenue and ensuring crowd security standards' }
+    ],
+    imageUrl: null,
+    imageSource: 'none',
+    imageFetchedAt: null
+  },
+  {
+    id: 'entity-cannes',
+    name: 'Cannes',
+    aliases: ['Cannes Film Festival'],
+    oneLiner: 'An annual film festival held in Cannes, France, which previews new films of all genres from around the world.',
+    certainty: 'confirmed',
+    whyNow: [
+      'Announces groundbreaking stage lineup focusing on independent filmmakers.',
+      'Cultural shift towards character-driven narrative distribution streams.'
+    ],
+    stakeholders: [
+      { name: 'Independent Filmmakers', wants: 'Distribution deals and international critical recognition' }
+    ],
+    imageUrl: null,
+    imageSource: 'none',
+    imageFetchedAt: null
+  },
+  {
+    id: 'entity-isro',
+    name: 'ISRO',
+    aliases: ['Indian Space Research Organisation'],
+    oneLiner: 'The national space agency of India, headquartered in Bengaluru, key to domestic space sector advancement.',
+    certainty: 'confirmed',
+    whyNow: [
+      'Launches three communication satellites into geosynchronous orbit.',
+      'Expanding satellite internet coverage to rural regional communities.'
+    ],
+    stakeholders: [
+      { name: 'ISRO Spacecraft Command', wants: 'Successful deployment and orbital slot security' }
+    ],
+    imageUrl: null,
+    imageSource: 'none',
+    imageFetchedAt: null
+  },
+  {
+    id: 'entity-stadium',
+    name: 'Stadium',
+    aliases: ['Roland Garros', 'Tennis Stadium'],
+    oneLiner: 'A premium sports stadium in Paris, France, hosting the prestigious grand slam tennis championships.',
+    certainty: 'confirmed',
+    whyNow: [
+      'Staging high-intensity matches under extreme summer heat waves.',
+      'Player disputes over scheduling and rest periods between matches.'
+    ],
+    stakeholders: [
+      { name: 'Tournament Directors', wants: 'Staging broadcast schedules on-time and managing spectator flows' }
+    ],
+    imageUrl: null,
+    imageSource: 'none',
+    imageFetchedAt: null
+  },
+  {
+    id: 'entity-festival',
+    name: 'VR Festival',
+    aliases: ['Virtual Reality Film Festival'],
+    oneLiner: 'A modern media festival showcasing virtual reality and immersive storytelling media.',
+    certainty: 'official statement',
+    whyNow: [
+      'Inaugural launch in Mumbai showcases interactive media technologies.',
+      'Independent creators exploring choosing narratives using headwear.'
+    ],
+    stakeholders: [
+      { name: 'VR Creators', wants: 'Technological platforms to distribute virtual content formats' }
+    ],
+    imageUrl: null,
+    imageSource: 'none',
+    imageFetchedAt: null
   }
 ];
+
+// Helper to create mock entity mention offsets dynamically on load
+function createMockMention(entityId: string, text: string, body: string, entity: any) {
+  const index = body.toLowerCase().indexOf(text.toLowerCase());
+  return {
+    id: `ae-mock-${entityId}-${index}-${Math.floor(Math.random() * 1000)}`,
+    startOffset: index !== -1 ? index : 0,
+    endOffset: index !== -1 ? index + text.length : 0,
+    entityId,
+    entity
+  };
+}
+
+// Bodies defined to be ~60 words.
+const body1 = "Antalya, Turkey — Ministers from NATO convened a special security summit in Antalya to discuss Mediterranean security and resolve maritime border disputes. The talks, mediated by regional diplomats, focused on de-escalating military naval deployments and establishing a joint communications framework to prevent accidental confrontations in international shipping lanes.";
+const body2 = "New Delhi — The Indian Parliament introduced a draft amendment to the Digital Personal Data Protection Act, aiming to simplify compliance procedures for early-stage technology startups. While government representatives argue the bill encourages innovation, opposition leaders express concerns regarding potential exemptions granted to state agencies, sparking a national debate on citizen privacy and surveillance.";
+const body3 = "New York — Major stock exchanges witnessed a wave of automated trading index adjustments as institutional investors shifted capital toward NASDAQ automation conglomerates. Economists signal this trend indicates a structural realignment in industrial manufacturing and software sectors, predicting long-term productivity boosts but warning of temporary white-collar labor displacement across service-oriented businesses.";
+const body4 = "London — Wembley Stadium witnessed one of the greatest upsets in modern tournament history as the underdog team secured a dramatic victory in the championship final. Analyzing analysts had predicted a comfortable victory for the tournament favorites, but a disciplined defense and two late counter-attacks secured the championship trophy for the challengers, igniting wild celebrations.";
+const body5 = "Cannes — Organizers of the Cannes Film Festival unveiled a groundbreaking stage lineup focusing entirely on independent filmmakers working outside traditional studio systems. The selection features experimental narratives, documentary formats, and low-budget productions, highlighting a shift in audience preferences towards authentic, character-driven storytelling over high-budget commercial releases.";
+const body6 = "Tromsø — High-level diplomats representing Norway and Russia held bilateral talks in the Arctic circle city of Tromsø to discuss maritime borders and resource claims. Amid melting polar ice caps opening new transit routes, both nations sought agreements on shipping corridors and environmental protection zones, balancing sovereign energy security interests with regional stability.";
+const body7 = "Bengaluru — The Indian Space Research Organisation (ISRO) successfully deployed three next-generation communication satellites into geosynchronous orbit. Launching from the Sriharikota spaceport, the mission aims to expand broadband internet connectivity to rural and remote regions of the country, marking a major milestone in India’s domestic space sector expansion.";
+const body8 = "Singapore — Global semiconductor supply chains are stabilizing as manufacturing plants in Singapore and neighboring Southeast Asian hubs complete major factory expansions. The increased production capacity is expected to resolve prolonged chip shortages affecting automotive and consumer electronics markets, lowering component costs and boosting manufacturing output heading into the third quarter.";
+const body9 = "Paris — The defending champion advanced to the grand slam tennis semi-finals after a grueling five-set victory lasting over four hours at the stadium. Defying physical fatigue, the top-ranked athlete secured key tiebreaker points in the final set, defeating a formidable challenger who pushed the match to the absolute limit under extreme summer heat.";
+const body10 = "Mumbai — A brand new Virtual Reality Film Festival launched in Mumbai this week, showcasing interactive storytelling projects from filmmakers across Asia. Attendees experienced immersive films using headsets, allowing viewers to choose narrative paths and interact with digital environments, signaling a new frontier in media consumption and independent content creation.";
 
 const mockArticles: any[] = [
   {
     id: 'article-1',
     headline: 'NATO Ministers Convene in Antalya to Address Mediterranean Security Concerns',
     slug: 'nato-ministers-convene-antalya-mediterranean',
-    body: 'Ministers from NATO gathered in Antalya, Turkey, this week to discuss regional stability and security cooperation. The conference, hosted by Turkish diplomats, aims to resolve disputes over maritime borders in the Mediterranean.',
+    body: body1,
     category: 'geopolitics',
     publishedAt: new Date(),
     createdAt: new Date(),
-    sourceUrl: 'https://example.com/nato-antalya',
+    sourceUrl: 'https://www.reuters.com/world/europe/nato-mediterranean-security-antalya',
     sourceName: 'Reuters News',
     sourceCountry: 'Global',
     narrativeId: 'narrative-1',
@@ -215,19 +358,20 @@ const mockArticles: any[] = [
     categoryImageId: 'cat-img-geopolitics',
     categoryImage: mockCategoryImages['geopolitics'],
     entities: [
-      { id: 'ae-1-1', startOffset: 15, endOffset: 19, entityId: 'entity-nato', entity: mockEntities[0] },
-      { id: 'ae-1-2', startOffset: 32, endOffset: 39, entityId: 'entity-antalya', entity: mockEntities[1] },
+      createMockMention('entity-nato', 'NATO', body1, mockEntities[0]),
+      createMockMention('entity-antalya', 'Antalya', body1, mockEntities[1]),
+      createMockMention('entity-mediterranean', 'Mediterranean', body1, mockEntities[2]),
     ]
   },
   {
     id: 'article-2',
     headline: 'Indian Parliament Proposes Digital Personal Data Protection Act Amendments',
     slug: 'indian-parliament-proposes-data-act-amendments',
-    body: 'New Delhi — The Indian Parliament debated amendments to the Digital Personal Data Protection Act. Officials stated the revisions aim to streamline compliance for startups.',
+    body: body2,
     category: 'national',
     publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    sourceUrl: 'https://example.com/indian-data-act',
+    sourceUrl: 'https://www.thehindu.com/news/national/parliament-personal-data-amendments',
     sourceName: 'The Hindu',
     sourceCountry: 'India',
     narrativeId: null,
@@ -236,18 +380,18 @@ const mockArticles: any[] = [
     categoryImageId: 'cat-img-domestic-politics',
     categoryImage: mockCategoryImages['national'],
     entities: [
-      { id: 'ae-2-1', startOffset: 16, endOffset: 33, entityId: 'entity-parliament', entity: mockEntities[2] },
+      createMockMention('entity-parliament', 'Parliament', body2, mockEntities[8]),
     ]
   },
   {
     id: 'article-3',
     headline: 'Global Markets Recoil as Tech Influx Signals Automation Shift',
     slug: 'global-markets-recoil-tech-influx-automation',
-    body: 'Silicon Valley — Tech firms at the NASDAQ stock exchange registered record-high investments, signaling a major automation shift.',
+    body: body3,
     category: 'business',
     publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    sourceUrl: 'https://example.com/tech-automation',
+    sourceUrl: 'https://economictimes.indiatimes.com/markets/stocks/global-markets-tech-automation',
     sourceName: 'Economic Times',
     sourceCountry: 'India',
     narrativeId: null,
@@ -256,18 +400,18 @@ const mockArticles: any[] = [
     categoryImageId: 'cat-img-economy',
     categoryImage: mockCategoryImages['business'],
     entities: [
-      { id: 'ae-3-1', startOffset: 23, endOffset: 29, entityId: 'entity-nasdaq', entity: mockEntities[3] },
+      createMockMention('entity-nasdaq', 'NASDAQ', body3, mockEntities[9]),
     ]
   },
   {
     id: 'article-4',
     headline: 'Championship Final: Underdog Victory Stuns Wembley Stadium Crowd',
     slug: 'championship-final-underdog-victory-wembley',
-    body: 'London — The Wembley Stadium final ended in a historic victory yesterday, defying predictions from sports analysts.',
+    body: body4,
     category: 'sports',
     publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    sourceUrl: 'https://example.com/wembley-victory',
+    sourceUrl: 'https://www.espn.com/football/story/wembley-underdog-championship-final',
     sourceName: 'ESPN Cricinfo',
     sourceCountry: 'Global',
     narrativeId: null,
@@ -276,18 +420,18 @@ const mockArticles: any[] = [
     categoryImageId: 'cat-img-sports',
     categoryImage: mockCategoryImages['sports'],
     entities: [
-      { id: 'ae-4-1', startOffset: 13, endOffset: 28, entityId: 'entity-wembley', entity: mockEntities[4] },
+      createMockMention('entity-wembley', 'Wembley', body4, mockEntities[10]),
     ]
   },
   {
     id: 'article-5',
     headline: 'Cannes Film Festival Announces Groundbreaking Independent Stage Lineup',
     slug: 'cannes-film-festival-announces-independent-lineup',
-    body: 'Cannes — Directors at the Cannes Film Festival unveiled the independent films lineup, signaling departures from mainstream releases.',
+    body: body5,
     category: 'entertainment',
     publishedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
-    sourceUrl: 'https://example.com/cannes-stage',
+    sourceUrl: 'https://www.hindustantimes.com/entertainment/cannes-film-festival-independent-lineup',
     sourceName: 'Hindustan Times Ent',
     sourceCountry: 'India',
     narrativeId: null,
@@ -296,7 +440,110 @@ const mockArticles: any[] = [
     categoryImageId: 'cat-img-entertainment',
     categoryImage: mockCategoryImages['entertainment'],
     entities: [
-      { id: 'ae-5-1', startOffset: 20, endOffset: 41, entityId: 'entity-cannes', entity: mockEntities[5] },
+      createMockMention('entity-cannes', 'Cannes', body5, mockEntities[11]),
+    ]
+  },
+  {
+    id: 'article-6',
+    headline: 'Diplomatic Envoys Hold Bilateral Arctic Borders Dialogue in Tromsø',
+    slug: 'diplomatic-envoys-bilateral-arctic-borders-tromso',
+    body: body6,
+    category: 'geopolitics',
+    publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2h ago
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    sourceUrl: 'https://www.aljazeera.com/news/world/arctic-borders-diplomatic-talks-tromso',
+    sourceName: 'Al Jazeera',
+    sourceCountry: 'Qatar',
+    narrativeId: null,
+    narrative: null,
+    stanceAxis: { left: 'De-escalates', right: 'Escalates' },
+    categoryImageId: 'cat-img-geopolitics',
+    categoryImage: mockCategoryImages['geopolitics'],
+    entities: [
+      createMockMention('entity-norway', 'Norway', body6, mockEntities[5]),
+      createMockMention('entity-tromso', 'Tromsø', body6, mockEntities[4]),
+      createMockMention('entity-arctic-council', 'Arctic', body6, mockEntities[3]),
+    ]
+  },
+  {
+    id: 'article-7',
+    headline: 'ISRO Deploys Next-Gen Broadband Communication Satellites Into Orbit',
+    slug: 'isro-deploys-next-gen-broadband-satellites-orbit',
+    body: body7,
+    category: 'national',
+    publishedAt: new Date(Date.now() - 3.5 * 60 * 60 * 1000), // 3.5h ago
+    createdAt: new Date(Date.now() - 3.5 * 60 * 60 * 1000),
+    sourceUrl: 'https://indianexpress.com/article/technology/science/isro-communication-satellites-launch',
+    sourceName: 'Indian Express',
+    sourceCountry: 'India',
+    narrativeId: null,
+    narrative: null,
+    stanceAxis: { left: 'Positive for the public', right: 'Concerning for the public' },
+    categoryImageId: 'cat-img-domestic-politics',
+    categoryImage: mockCategoryImages['national'],
+    entities: [
+      createMockMention('entity-isro', 'ISRO', body7, mockEntities[12]),
+    ]
+  },
+  {
+    id: 'article-8',
+    headline: 'Semiconductor Supply Chains Stabilize as Singapore Factories Expand',
+    slug: 'semiconductor-supply-chains-stabilize-singapore-expand',
+    body: body8,
+    category: 'business',
+    publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
+    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
+    sourceUrl: 'https://www.livemint.com/news/world/semiconductor-supply-chains-stabilize-singapore',
+    sourceName: 'Livemint',
+    sourceCountry: 'India',
+    narrativeId: null,
+    narrative: null,
+    stanceAxis: { left: 'Bearish', right: 'Bullish' },
+    categoryImageId: 'cat-img-economy',
+    categoryImage: mockCategoryImages['business'],
+    entities: [
+      createMockMention('entity-singapore', 'Singapore', body8, mockEntities[6]),
+      createMockMention('entity-malacca-strait', 'Singapore', body8, mockEntities[7]),
+    ]
+  },
+  {
+    id: 'article-9',
+    headline: 'Defending Champion Secures Paris Grand Slam Semi-Final Slot',
+    slug: 'defending-champion-secures-paris-grand-slam-semi-final',
+    body: body9,
+    category: 'sports',
+    publishedAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
+    createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
+    sourceUrl: 'https://www.thehindu.com/sport/tennis/paris-grand-slam-championship-victory',
+    sourceName: 'The Hindu Sport',
+    sourceCountry: 'India',
+    narrativeId: null,
+    narrative: null,
+    stanceAxis: { left: 'Underdog wins', right: 'Favorite wins' },
+    categoryImageId: 'cat-img-sports',
+    categoryImage: mockCategoryImages['sports'],
+    entities: [
+      createMockMention('entity-stadium', 'Stadium', body9, mockEntities[13]),
+    ]
+  },
+  {
+    id: 'article-10',
+    headline: 'Virtual Reality Film Festival Launches Interactive Showcase in Mumbai',
+    slug: 'virtual-reality-film-festival-launches-mumbai',
+    body: body10,
+    category: 'entertainment',
+    publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+    createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+    sourceUrl: 'https://indianexpress.com/article/entertainment/bollywood/mumbai-virtual-reality-film-festival',
+    sourceName: 'Indian Express Ent',
+    sourceCountry: 'India',
+    narrativeId: null,
+    narrative: null,
+    stanceAxis: { left: 'Underwhelming', right: 'Lives up to the hype' },
+    categoryImageId: 'cat-img-entertainment',
+    categoryImage: mockCategoryImages['entertainment'],
+    entities: [
+      createMockMention('entity-festival', 'VR Festival', body10, mockEntities[14]),
     ]
   }
 ];
@@ -308,6 +555,19 @@ const mockStanceVotes: Record<string, number[]> = {
   'article-3': [60, 65, 75, 80, 85, 90],
   'article-4': [15, 20, 25, 45, 60],
   'article-5': [55, 60, 70, 72, 85],
+  'article-6': [20, 30, 40, 50, 60],
+  'article-7': [70, 75, 80, 85],
+  'article-8': [40, 45, 50, 55, 60],
+  'article-9': [10, 15, 20, 25, 30],
+  'article-10': [60, 65, 70, 75, 80]
+};
+
+// In-memory opinions fallback
+const mockOpinions: Record<string, any[]> = {
+  'article-1': [
+    { id: 'op-1', articleId: 'article-1', body: 'Strategic security talks are essential for keeping regional corridors open.', sessionId: 'mock-session-1', status: 'approved', createdAt: new Date(Date.now() - 3600000) },
+    { id: 'op-2', articleId: 'article-1', body: 'Turkey’s diplomatic leadership during this summit will be critical.', sessionId: 'mock-session-2', status: 'approved', createdAt: new Date(Date.now() - 7200000) }
+  ]
 };
 
 const mockNarratives = [
@@ -355,11 +615,11 @@ export async function getArticles() {
     slug: a.slug,
     body: a.body,
     category: a.category,
+    publishedAt: a.publishedAt,
+    createdAt: a.createdAt,
     sourceUrl: a.sourceUrl,
     sourceName: a.sourceName,
     sourceCountry: a.sourceCountry,
-    publishedAt: a.publishedAt,
-    createdAt: a.createdAt,
     narrativeId: a.narrativeId,
     narrative: a.narrative,
     stanceAxis: a.stanceAxis,
@@ -496,6 +756,73 @@ export async function recordStanceVote(articleId: string, value: number, session
   return { id: `mock-vote-${Date.now()}`, articleId, value, sessionId };
 }
 
+export async function getApprovedOpinions(articleId: string) {
+  const dbConnected = await checkDbConnection();
+  if (dbConnected) {
+    try {
+      return await prisma.opinion.findMany({
+        where: { articleId, status: 'approved' },
+        orderBy: { createdAt: 'desc' }
+      });
+    } catch (e) {
+      console.error('Error fetching opinions from DB.', e);
+    }
+  }
+
+  // Mock fallback
+  if (!mockOpinions[articleId]) {
+    mockOpinions[articleId] = [];
+  }
+  return mockOpinions[articleId].filter(o => o.status === 'approved');
+}
+
+export async function saveOpinion(articleId: string, body: string, sessionId: string, status: string) {
+  const dbConnected = await checkDbConnection();
+  if (dbConnected) {
+    try {
+      // Rate limit check: One opinion per article per session
+      const existing = await prisma.opinion.findFirst({
+        where: { articleId, sessionId }
+      });
+      if (existing) {
+        throw new Error('You have already submitted an opinion for this article.');
+      }
+
+      return await prisma.opinion.create({
+        data: {
+          articleId,
+          body,
+          sessionId,
+          status
+        }
+      });
+    } catch (e: any) {
+      console.error('Error saving opinion to DB.', e);
+      throw e;
+    }
+  }
+
+  // Mock fallback
+  if (!mockOpinions[articleId]) {
+    mockOpinions[articleId] = [];
+  }
+  const existing = mockOpinions[articleId].find(o => o.sessionId === sessionId);
+  if (existing) {
+    throw new Error('You have already submitted an opinion for this article.');
+  }
+
+  const newOpinion = {
+    id: `mock-op-${Date.now()}`,
+    articleId,
+    body,
+    sessionId,
+    status,
+    createdAt: new Date()
+  };
+  mockOpinions[articleId].push(newOpinion);
+  return newOpinion;
+}
+
 export async function getNarrativeThreads() {
   const dbConnected = await checkDbConnection();
   if (dbConnected) {
@@ -627,7 +954,7 @@ export async function saveArticle(data: {
         });
 
         for (const ent of data.entities) {
-          const entImg = await resolveEntityImage(ent.name);
+          const entImg = await resolveEntityImage(ent.name, data.category);
 
           let entityRecord = await tx.entity.findUnique({
             where: { name: ent.name },
@@ -710,7 +1037,7 @@ export async function saveArticle(data: {
   for (const e of data.entities) {
     let matched = mockEntities.find(me => me.name === e.name);
     if (!matched) {
-      const entImg = await resolveEntityImage(e.name);
+      const entImg = await resolveEntityImage(e.name, data.category);
       matched = {
         id: `entity-${e.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
         name: e.name,

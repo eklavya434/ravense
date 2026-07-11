@@ -157,14 +157,10 @@ export default async function HomePage({ searchParams }: PageProps) {
                   });
                   const relativeTimeStr = getRelativeTimeString(article.publishedAt);
 
-                  const snippet = article.body.length > 150 
-                    ? article.body.substring(0, 150) + '...'
-                    : article.body;
-
                   return (
                     <article 
                       key={article.id} 
-                      className="group relative border border-ink/10 p-6 md:p-8 hover:border-wax/50 bg-paper/50 hover:bg-paper rounded-lg transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
+                      className="border border-ink/10 p-6 md:p-8 hover:border-wax/50 bg-paper/50 hover:bg-paper rounded-lg transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
                     >
                       {/* Top Metadata */}
                       <div className="flex items-center justify-between gap-4 mb-4">
@@ -188,25 +184,37 @@ export default async function HomePage({ searchParams }: PageProps) {
                       </div>
 
                       {/* Headline */}
-                      <h2 className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-ink group-hover:text-wax transition-colors duration-200">
+                      <h2 className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-ink hover:text-wax transition-colors duration-200">
                         <Link href={`/article/${article.slug}`} className="focus:outline-none">
-                          <span className="absolute inset-0" aria-hidden="true" />
                           {article.headline}
                         </Link>
                       </h2>
 
-                      {/* Teaser */}
+                      {/* Teaser (Full 60-word body) */}
                       <p className="mt-4 font-sans text-sm md:text-base text-ink/75 leading-relaxed">
-                        {snippet}
+                        {article.body}
                       </p>
 
-                      {/* Footer read link */}
-                      <div className="mt-6 flex items-center gap-2">
-                        <span className="font-mono text-xs uppercase tracking-wider text-ink/80 group-hover:text-wax group-hover:translate-x-1 transition-all duration-200">
-                          Read Intel Report &rarr;
-                        </span>
+                      {/* Footer Actions */}
+                      <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-ink/5 pt-4">
+                        <Link 
+                          href={`/article/${article.slug}`}
+                          className="font-mono text-xs uppercase tracking-wider text-wax font-bold hover:underline"
+                        >
+                          Analyze Dispatch &rarr;
+                        </Link>
+                        {article.sourceUrl && (
+                          <a 
+                            href={article.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-xs uppercase tracking-wider text-ink/40 hover:text-ink hover:underline"
+                          >
+                            Original Source &nearr;
+                          </a>
+                        )}
                         {article.narrative && (
-                          <span className="ml-auto font-mono text-[10px] uppercase tracking-wider text-ink/40 border border-ink/10 px-2 py-0.5 rounded">
+                          <span className="ml-auto font-mono text-[9px] uppercase tracking-wider text-ink/40 border border-ink/10 px-2 py-0.5 rounded">
                             Part of: {article.narrative.title}
                           </span>
                         )}
