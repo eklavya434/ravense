@@ -20,7 +20,7 @@ model Article {
   slug            String          @unique
   body            String          @db.Text
   category        Category
-  sourceUrl       String?
+  sourceUrl       String?         @unique
   publishedAt     DateTime
   createdAt       DateTime        @default(now())
   entities        ArticleEntity[]
@@ -82,4 +82,13 @@ model CategoryImage {
   photographerUrl  String
   fetchedAt        DateTime        @default(now())
   articles         Article[]
+}
+
+model IngestionLog {
+  id            String   @id @default(cuid())
+  runAt         DateTime @default(now())
+  feedsChecked  Int
+  newArticles   Int
+  skipped       Int
+  errors        Json?
 }

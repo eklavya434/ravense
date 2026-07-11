@@ -188,7 +188,7 @@ const mockEntities: any[] = [
       'Surge in shipping insurance premiums for vessels crossing the strait.'
     ],
     stakeholders: [
-      { name: 'International Shipping Association', wants: 'Enhanced security and reduction of insurance risk premiums' },
+      { name: 'International Shipping Association', wants: 'Enhanced security and reduction of shipping risk premiums' },
       { name: 'Indonesia & Malaysia', wants: 'Maintenance of sovereignty over the waters while securing trade routes' }
     ],
     imageUrl: null,
@@ -536,6 +536,24 @@ export async function saveArticle(data: {
     mentions: Array<{ startOffset: number; endOffset: number }>;
   }>;
 }) {
+  // Deduplicate against sourceUrl first
+  if (data.sourceUrl) {
+    const dbConnected = await checkDbConnection();
+    if (dbConnected) {
+      const existingUrl = await prisma.article.findUnique({
+        where: { sourceUrl: data.sourceUrl }
+      });
+      if (existingUrl) {
+        throw new Error(`Article with sourceUrl ${data.sourceUrl} already exists.`);
+      }
+    } else {
+      const existingUrl = mockArticles.find(a => a.sourceUrl === data.sourceUrl);
+      if (existingUrl) {
+        throw new Error(`Article with sourceUrl ${data.sourceUrl} already exists.`);
+      }
+    }
+  }
+
   const catImg = await resolveCategoryImage(data.category);
   const dbConnected = await checkDbConnection();
 
@@ -729,4 +747,24 @@ export async function saveArticle(data: {
   mockStanceVotes[newId] = [];
 
   return newArticle;
+}
+
+export async function logIngestionRun(feedsChecked: number, newArticles: number, skipped: number, errors: any) {
+  const dbConnected = await checkDbConnection();
+  if (dbConnected) {
+    try {
+      return await prisma.ingestionLog.create({
+        data: {
+          feedsChecked,
+          newArticles,
+          skipped,
+          errors: errors ? (errors as any) : undefined
+        }
+      });
+    } catch (e) {
+      console.error('Error writing IngestionLog to DB:', e);
+    }
+  }
+  console.log(`[INGESTION LOG] Feeds checked: ${feedsChecked}, new: ${newArticles}, skipped: ${skipped}, errors:`, errors);
+  return null;
 }

@@ -1,13 +1,28 @@
 import Link from 'next/link';
 import { getArticles, getNarrativeThreads } from '@/lib/data';
 import CategoryNav from '@/components/CategoryNav';
-import { BookOpen, FolderOpen, Calendar, HelpCircle } from 'lucide-react';
+import { BookOpen, FolderOpen, Calendar, Activity } from 'lucide-react';
 
 interface PageProps {
   searchParams: Promise<{ category?: string; narrative?: string }>;
 }
 
 export const dynamic = 'force-dynamic';
+
+function getRelativeTimeString(date: Date | string) {
+  const now = new Date();
+  const published = new Date(date);
+  const diffMs = now.getTime() - published.getTime();
+  const diffMins = Math.floor(diffMs / (60 * 1000));
+  const diffHours = Math.floor(diffMs / (60 * 60 * 1000));
+  const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+
+  if (diffMins < 1) return 'just in';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 1) return 'yesterday';
+  return `${diffDays}d ago`;
+}
 
 export default async function HomePage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
@@ -30,6 +45,13 @@ export default async function HomePage({ searchParams }: PageProps) {
     filteredArticles = allArticles.filter(a => a.category === activeCategory);
   }
 
+  // Filter "Just In" articles (published in the last 4 hours)
+  const now = new Date();
+  const justInArticles = allArticles.filter(art => {
+    const diffMs = now.getTime() - new Date(art.publishedAt).getTime();
+    return diffMs >= 0 && diffMs < 4 * 60 * 60 * 1000;
+  });
+
   return (
     <>
       {/* Sticky Header Nav */}
@@ -44,7 +66,7 @@ export default async function HomePage({ searchParams }: PageProps) {
           <div className="lg:col-span-3 space-y-8">
             
             {/* Header Section */}
-            <header className="border-b border-ink/10 pb-8 mb-8 text-center md:text-left flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <header className="border-b border-ink/10 pb-8 mb-6 text-center md:text-left flex flex-col md:flex-row md:items-end md:justify-between gap-6">
               <div>
                 <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
                   <span className="font-mono text-xs uppercase tracking-widest text-ink/60">
@@ -69,6 +91,36 @@ export default async function HomePage({ searchParams }: PageProps) {
                 </Link>
               </div>
             </header>
+
+            {/* "Just In" Strip */}
+            {justInArticles.length > 0 && (
+              <section className="bg-wax/5 border border-wax/20 p-4 rounded-lg flex flex-col gap-3 animate-fadeIn">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-wax animate-ping" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-wax font-bold">
+                    Just In
+                  </span>
+                </div>
+                <div className="flex flex-col md:flex-row gap-4 overflow-x-auto py-1 no-scrollbar">
+                  {justInArticles.map(art => {
+                    const relativeTime = getRelativeTimeString(art.publishedAt);
+                    return (
+                      <Link 
+                        key={art.id} 
+                        href={`/article/${art.slug}`}
+                        className="text-left font-serif text-xs flex flex-col gap-1 p-3 bg-paper border border-ink/5 hover:border-wax hover:bg-paper/85 rounded transition-all shrink-0 w-full md:w-60 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono text-[9px] text-wax uppercase tracking-wider font-semibold">{art.category}</span>
+                          <span className="font-mono text-[9px] text-ink/40 font-bold">{relativeTime}</span>
+                        </div>
+                        <span className="line-clamp-2 text-ink font-bold leading-tight mt-1">{art.headline}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
             {/* Timeline Filter Active Banner */}
             {activeNarrative && (
@@ -103,6 +155,7 @@ export default async function HomePage({ searchParams }: PageProps) {
                     month: 'long',
                     day: 'numeric'
                   });
+                  const relativeTimeStr = getRelativeTimeString(article.publishedAt);
 
                   const snippet = article.body.length > 150 
                     ? article.body.substring(0, 150) + '...'
@@ -118,12 +171,13 @@ export default async function HomePage({ searchParams }: PageProps) {
                         <span className="font-mono text-xs uppercase tracking-wider text-wax font-medium bg-wax/5 px-2 py-0.5 rounded border border-wax/10">
                           {article.category}
                         </span>
-                        <time 
-                          dateTime={new Date(article.publishedAt).toISOString()}
-                          className="font-mono text-xs text-ink/50"
-                        >
-                          {dateStr}
-                        </time>
+                        <div className="flex items-center gap-2 font-mono text-xs text-ink/50">
+                          <time dateTime={new Date(article.publishedAt).toISOString()}>
+                            {dateStr}
+                          </time>
+                          <span>&bull;</span>
+                          <span className="text-wax font-bold">{relativeTimeStr}</span>
+                        </div>
                       </div>
 
                       {/* Headline */}
