@@ -3,14 +3,17 @@
 import { redirect } from 'next/navigation';
 import { saveArticle } from '@/lib/data';
 import { extractEntities, generateEntityContext } from '@/lib/gemini';
+import { Category } from '@prisma/client';
 
 export async function ingestArticle(formData: FormData) {
   const headline = formData.get('headline') as string;
   const body = formData.get('body') as string;
   const category = formData.get('category') as string;
   const sourceUrl = (formData.get('sourceUrl') as string) || undefined;
-  const leftStance = (formData.get('leftStance') as string) || 'De-escalates';
-  const rightStance = (formData.get('rightStance') as string) || 'Escalates';
+  const leftStance = (formData.get('leftStance') as string) || undefined;
+  const rightStance = (formData.get('rightStance') as string) || undefined;
+  const narrativeId = (formData.get('narrativeId') as string) || undefined;
+  const newNarrativeTitle = (formData.get('newNarrativeTitle') as string) || undefined;
 
   if (!headline || !body || !category) {
     throw new Error('Headline, body, and category are required.');
@@ -41,7 +44,7 @@ export async function ingestArticle(formData: FormData) {
 
     resolvedEntities.push({
       name: ent.name,
-      aliases: [], // Alternate forms can be resolved in future iterations
+      aliases: [],
       oneLiner: context.oneLiner,
       certainty: context.certainty,
       whyNow: context.whyNow,
@@ -53,7 +56,12 @@ export async function ingestArticle(formData: FormData) {
     });
   }
 
-  // 3. Save article and entities using the data layer (Prisma or Mock fallback)
+  // Determine stance labels
+  const stanceAxis = (leftStance || rightStance) 
+    ? { left: leftStance || 'De-escalates', right: rightStance || 'Escalates' }
+    : undefined;
+
+  // 3. Save article and entities using the data layer
   await saveArticle({
     headline,
     slug,
@@ -61,7 +69,9 @@ export async function ingestArticle(formData: FormData) {
     category,
     sourceUrl,
     publishedAt: new Date(),
-    stanceAxis: { left: leftStance, right: rightStance },
+    stanceAxis: stanceAxis as any, // Cast because it defaults per category in UI/data layer
+    narrativeId,
+    newNarrativeTitle,
     entities: resolvedEntities,
   });
 

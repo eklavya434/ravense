@@ -12,36 +12,36 @@ const mockCategoryImages: Record<string, { id: string; category: string; imageUr
     photographerUrl: "https://unsplash.com/@jhonkasalo",
     fetchedAt: new Date()
   },
-  'domestic-politics': {
+  'national': {
     id: 'cat-img-domestic-politics',
-    category: 'domestic-politics',
+    category: 'national',
     imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
     photographerName: "Kyle Glenn",
     photographerUrl: "https://unsplash.com/@kyleglenn",
     fetchedAt: new Date()
   },
-  'economy': {
+  'business': {
     id: 'cat-img-economy',
-    category: 'economy',
+    category: 'business',
     imageUrl: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=80",
     photographerName: "M. B. M.",
     photographerUrl: "https://unsplash.com/@mbm",
     fetchedAt: new Date()
   },
-  'macroeconomics': {
-    id: 'cat-img-macroeconomics',
-    category: 'macroeconomics',
-    imageUrl: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=80",
-    photographerName: "M. B. M.",
-    photographerUrl: "https://unsplash.com/@mbm",
+  'sports': {
+    id: 'cat-img-sports',
+    category: 'sports',
+    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80",
+    photographerName: "Conor Luddy",
+    photographerUrl: "https://unsplash.com/@conorluddy",
     fetchedAt: new Date()
   },
-  'security': {
-    id: 'cat-img-security',
-    category: 'security',
-    imageUrl: "https://images.unsplash.com/photo-1508847154043-be12a62861c1?auto=format&fit=crop&w=1200&q=80",
-    photographerName: "Sven-Erik Arndt",
-    photographerUrl: "https://unsplash.com/@sven-erik-arndt",
+  'entertainment': {
+    id: 'cat-img-entertainment',
+    category: 'entertainment',
+    imageUrl: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1200&q=80",
+    photographerName: "Krists Luhaers",
+    photographerUrl: "https://unsplash.com/@krists",
     fetchedAt: new Date()
   }
 };
@@ -202,7 +202,7 @@ const mockArticles: any[] = [
     id: 'article-1',
     headline: 'NATO Ministers Convene in Antalya to Address Mediterranean Security Concerns',
     slug: 'nato-ministers-convene-antalya-mediterranean',
-    body: 'Ministers from NATO gathered in Antalya, Turkey, this week to discuss regional stability and security cooperation. The conference, hosted by Turkish diplomats, aims to resolve disputes over maritime borders in the Mediterranean. Officials from the Alliance stated that the summit serves as a crucial platform to reinforce the security framework in Eastern Europe and the Middle East.',
+    body: 'Ministers from NATO gathered in Antalya, Turkey, this week to discuss regional stability and security cooperation. The conference, hosted by Turkish diplomats, aims to resolve disputes over maritime borders in the Mediterranean.',
     category: 'geopolitics',
     publishedAt: new Date(),
     createdAt: new Date(),
@@ -215,48 +215,78 @@ const mockArticles: any[] = [
     entities: [
       { id: 'ae-1-1', startOffset: 15, endOffset: 19, entityId: 'entity-nato', entity: mockEntities[0] },
       { id: 'ae-1-2', startOffset: 32, endOffset: 39, entityId: 'entity-antalya', entity: mockEntities[1] },
-      { id: 'ae-1-3', startOffset: 188, endOffset: 201, entityId: 'entity-mediterranean', entity: mockEntities[2] },
-      { id: 'ae-1-4', startOffset: 221, endOffset: 229, entityId: 'entity-nato', entity: mockEntities[0] },
     ]
   },
   {
     id: 'article-2',
-    headline: 'Arctic Council Deadlock: Tromsø Summit Ends Without Accord',
-    slug: 'arctic-council-deadlock-tromso-summit-fails',
-    body: 'The Arctic Council meeting in Tromsø concluded yesterday without a joint statement, highlighting deep disagreements over mineral exploration. Norway, representing the current chair, attempted to broker a compromise on resource extraction boundaries, but representatives from Russia and the United States remained divided on environmental regulations. Observers note that the failure to reach consensus signals a growing militarization and economic rivalry in the polar region.',
-    category: 'geopolitics',
+    headline: 'Indian Parliament Proposes Digital Personal Data Protection Act Amendments',
+    slug: 'indian-parliament-proposes-data-act-amendments',
+    body: 'New Delhi — The Indian Parliament debated amendments to the Digital Personal Data Protection Act. Officials stated the revisions aim to streamline compliance for startups.',
+    category: 'national',
     publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    sourceUrl: 'https://example.com/arctic-tromso',
+    sourceUrl: 'https://example.com/indian-data-act',
     narrativeId: null,
     narrative: null,
-    stanceAxis: { left: 'Diplomatic De-escalation', right: 'Militarization/Conflict' },
-    categoryImageId: 'cat-img-geopolitics',
-    categoryImage: mockCategoryImages['geopolitics'],
+    stanceAxis: { left: 'Positive for the public', right: 'Concerning for the public' },
+    categoryImageId: 'cat-img-domestic-politics',
+    categoryImage: mockCategoryImages['national'],
     entities: [
-      { id: 'ae-2-1', startOffset: 4, endOffset: 18, entityId: 'entity-arctic-council', entity: mockEntities[3] },
-      { id: 'ae-2-2', startOffset: 30, endOffset: 36, entityId: 'entity-tromso', entity: mockEntities[4] },
-      { id: 'ae-2-3', startOffset: 105, endOffset: 111, entityId: 'entity-norway', entity: mockEntities[5] },
+      { id: 'ae-2-1', startOffset: 16, endOffset: 33, entityId: 'entity-parliament', entity: mockEntities[2] },
     ]
   },
   {
     id: 'article-3',
-    headline: 'Trilateral Patrols Initiated in the Strait of Malacca Amid Shipping Fears',
-    slug: 'trilateral-patrols-initiated-strait-malacca',
-    body: 'Singapore, Malaysia, and Indonesia have launched a series of joint naval exercises in the Strait of Malacca. The initiative, codenamed Operation Malacca Shield, is designed to deter piracy and address piracy and insurance premium surges. Insurance giants in London have recently classified the channel as a high-risk zone, causing maritime transport firms to demand state-backed escorts.',
-    category: 'geopolitics',
+    headline: 'Global Markets Recoil as Tech Influx Signals Automation Shift',
+    slug: 'global-markets-recoil-tech-influx-automation',
+    body: 'Silicon Valley — Tech firms at the NASDAQ stock exchange registered record-high investments, signaling a major automation shift.',
+    category: 'business',
     publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    sourceUrl: 'https://example.com/malacca-patrols',
-    narrativeId: 'narrative-1',
-    narrative: mockNarrative,
-    stanceAxis: { left: 'Stabilizes Shipping', right: 'Heightens Regional Tensions' },
-    categoryImageId: 'cat-img-geopolitics',
-    categoryImage: mockCategoryImages['geopolitics'],
+    sourceUrl: 'https://example.com/tech-automation',
+    narrativeId: null,
+    narrative: null,
+    stanceAxis: { left: 'Bearish', right: 'Bullish' },
+    categoryImageId: 'cat-img-economy',
+    categoryImage: mockCategoryImages['business'],
     entities: [
-      { id: 'ae-3-1', startOffset: 0, endOffset: 9, entityId: 'entity-singapore', entity: mockEntities[6] },
-      { id: 'ae-3-2', startOffset: 104, endOffset: 121, entityId: 'entity-malacca-strait', entity: mockEntities[7] },
-      { id: 'ae-3-3', startOffset: 217, endOffset: 224, entityId: 'entity-malacca-strait', entity: mockEntities[7] },
+      { id: 'ae-3-1', startOffset: 23, endOffset: 29, entityId: 'entity-nasdaq', entity: mockEntities[3] },
+    ]
+  },
+  {
+    id: 'article-4',
+    headline: 'Championship Final: Underdog Victory Stuns Wembley Stadium Crowd',
+    slug: 'championship-final-underdog-victory-wembley',
+    body: 'London — The Wembley Stadium final ended in a historic victory yesterday, defying predictions from sports analysts.',
+    category: 'sports',
+    publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    sourceUrl: 'https://example.com/wembley-victory',
+    narrativeId: null,
+    narrative: null,
+    stanceAxis: { left: 'Underdog wins', right: 'Favorite wins' },
+    categoryImageId: 'cat-img-sports',
+    categoryImage: mockCategoryImages['sports'],
+    entities: [
+      { id: 'ae-4-1', startOffset: 13, endOffset: 28, entityId: 'entity-wembley', entity: mockEntities[4] },
+    ]
+  },
+  {
+    id: 'article-5',
+    headline: 'Cannes Film Festival Announces Groundbreaking Independent Stage Lineup',
+    slug: 'cannes-film-festival-announces-independent-lineup',
+    body: 'Cannes — Directors at the Cannes Film Festival unveiled the independent films lineup, signaling departures from mainstream releases.',
+    category: 'entertainment',
+    publishedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+    sourceUrl: 'https://example.com/cannes-stage',
+    narrativeId: null,
+    narrative: null,
+    stanceAxis: { left: 'Underwhelming', right: 'Lives up to the hype' },
+    categoryImageId: 'cat-img-entertainment',
+    categoryImage: mockCategoryImages['entertainment'],
+    entities: [
+      { id: 'ae-5-1', startOffset: 20, endOffset: 41, entityId: 'entity-cannes', entity: mockEntities[5] },
     ]
   }
 ];
@@ -264,9 +294,18 @@ const mockArticles: any[] = [
 // In-memory stance votes fallback
 const mockStanceVotes: Record<string, number[]> = {
   'article-1': [10, 20, 30, 45, 60, 62, 70, 75, 80],
-  'article-2': [80, 85, 90, 75, 95, 65, 88],
-  'article-3': [40, 45, 50, 55, 60, 48, 52],
+  'article-2': [20, 25, 30, 48, 50, 45],
+  'article-3': [60, 65, 75, 80, 85, 90],
+  'article-4': [15, 20, 25, 45, 60],
+  'article-5': [55, 60, 70, 72, 85],
 };
+
+const mockNarratives = [
+  {
+    id: 'narrative-1',
+    title: 'Global Maritime & Border Security Summit 2026',
+  }
+];
 
 // Check if database is configured and accessible
 let isDbActive = false;
@@ -430,6 +469,37 @@ export async function recordStanceVote(articleId: string, value: number, session
   return { id: `mock-vote-${Date.now()}`, articleId, value, sessionId };
 }
 
+export async function getNarrativeThreads() {
+  const dbConnected = await checkDbConnection();
+  if (dbConnected) {
+    try {
+      return await prisma.narrativeThread.findMany({
+        include: {
+          articles: {
+            orderBy: { publishedAt: 'asc' },
+          },
+        },
+      });
+    } catch (e) {
+      console.error('Error fetching narrative threads from DB.', e);
+    }
+  }
+
+  // Mock fallback
+  return mockNarratives.map(n => ({
+    id: n.id,
+    title: n.title,
+    articles: mockArticles
+      .filter(a => a.narrativeId === n.id)
+      .map(a => ({
+        id: a.id,
+        headline: a.headline,
+        slug: a.slug,
+        publishedAt: a.publishedAt,
+      })),
+  }));
+}
+
 // Function to save new article (admin page)
 export async function saveArticle(data: {
   headline: string;
@@ -439,6 +509,8 @@ export async function saveArticle(data: {
   sourceUrl?: string;
   publishedAt: Date;
   stanceAxis: { left: string; right: string };
+  narrativeId?: string;
+  newNarrativeTitle?: string;
   entities: Array<{
     name: string;
     aliases: string[];
@@ -449,10 +521,9 @@ export async function saveArticle(data: {
     mentions: Array<{ startOffset: number; endOffset: number }>;
   }>;
 }) {
-  // 1. Resolve Category Image (via Unsplash API or fallback)
   const catImg = await resolveCategoryImage(data.category);
-
   const dbConnected = await checkDbConnection();
+
   if (dbConnected) {
     try {
       const existing = await prisma.article.findUnique({
@@ -481,6 +552,17 @@ export async function saveArticle(data: {
           });
         }
 
+        // Handle narrative thread creation or linking
+        let finalNarrativeId: string | null = null;
+        if (data.newNarrativeTitle) {
+          const nt = await tx.narrativeThread.create({
+            data: { title: data.newNarrativeTitle }
+          });
+          finalNarrativeId = nt.id;
+        } else if (data.narrativeId) {
+          finalNarrativeId = data.narrativeId;
+        }
+
         const article = await tx.article.create({
           data: {
             headline: data.headline,
@@ -491,11 +573,11 @@ export async function saveArticle(data: {
             publishedAt: data.publishedAt,
             stanceAxis: data.stanceAxis,
             categoryImageId: dbCatImg.id,
+            narrativeId: finalNarrativeId,
           },
         });
 
         for (const ent of data.entities) {
-          // Resolve entity image (via Wikidata API or fallback)
           const entImg = await resolveEntityImage(ent.name);
 
           let entityRecord = await tx.entity.findUnique({
@@ -517,7 +599,6 @@ export async function saveArticle(data: {
               },
             });
           } else if (!entityRecord.imageUrl && entityRecord.imageSource !== 'none') {
-            // Update entity image if it was previously missing
             entityRecord = await tx.entity.update({
               where: { id: entityRecord.id },
               data: {
@@ -564,11 +645,22 @@ export async function saveArticle(data: {
     mockCategoryImages[data.category] = memoryCatImg;
   }
 
+  // Resolve narrative object for mock
+  let mockNarrativeObj: any = null;
+  if (data.newNarrativeTitle) {
+    mockNarrativeObj = {
+      id: `narrative-${Date.now()}`,
+      title: data.newNarrativeTitle,
+    };
+    mockNarratives.push(mockNarrativeObj);
+  } else if (data.narrativeId) {
+    mockNarrativeObj = mockNarratives.find(n => n.id === data.narrativeId) || null;
+  }
+
   const resolvedEntities = [];
   for (const e of data.entities) {
     let matched = mockEntities.find(me => me.name === e.name);
     if (!matched) {
-      // Resolve entity image
       const entImg = await resolveEntityImage(e.name);
       matched = {
         id: `entity-${e.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
@@ -610,8 +702,8 @@ export async function saveArticle(data: {
     publishedAt: data.publishedAt,
     createdAt: new Date(),
     sourceUrl: data.sourceUrl || null,
-    narrativeId: null,
-    narrative: null,
+    narrativeId: mockNarrativeObj ? mockNarrativeObj.id : null,
+    narrative: mockNarrativeObj,
     stanceAxis: data.stanceAxis,
     categoryImageId: memoryCatImg.id,
     categoryImage: memoryCatImg,

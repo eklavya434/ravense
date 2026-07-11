@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Cpu, Send, RefreshCw, Rss, Info, CheckCircle } from 'lucide-react';
 import { ingestArticle } from './actions';
@@ -12,6 +12,25 @@ export default function IngestPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [selectedRssCategory, setSelectedRssCategory] = useState<CategoryKey>('geopolitics');
+  const [narratives, setNarratives] = useState<Array<{ id: string; title: string }>>([]);
+
+  // Load existing narratives on mount
+  useEffect(() => {
+    const fetchNarratives = async () => {
+      try {
+        const res = await fetch('/api/narratives');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            setNarratives(data);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load narrative threads:', err);
+      }
+    };
+    fetchNarratives();
+  }, [successMsg]); // Reload when an article is successfully ingested (which might have created a new thread)
 
   const handleManualSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -185,6 +204,42 @@ export default function IngestPage() {
                 placeholder="Paste raw, unmodified article text here..."
                 className="w-full px-4 py-2.5 border border-ink/20 rounded bg-paper/30 font-sans text-sm leading-relaxed text-ink focus:outline-none focus:border-wax focus:bg-paper"
               />
+            </div>
+
+            {/* Narrative Thread Options */}
+            <div className="border border-ink/10 p-4 rounded bg-paper/20 space-y-4">
+              <span className="block font-mono text-[10px] uppercase tracking-widest text-wax font-bold mb-2">
+                Narrative Thread Association
+              </span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="narrativeId" className="block font-mono text-[10px] uppercase tracking-wider text-ink/60">
+                    Link to Existing Thread
+                  </label>
+                  <select
+                    id="narrativeId"
+                    name="narrativeId"
+                    className="w-full px-3 py-2 border border-ink/10 rounded bg-paper/20 font-mono text-xs uppercase tracking-wider text-ink focus:outline-none focus:border-wax"
+                  >
+                    <option value="">-- None --</option>
+                    {narratives.map(t => (
+                      <option key={t.id} value={t.id}>{t.title}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="newNarrativeTitle" className="block font-mono text-[10px] uppercase tracking-wider text-ink/60">
+                    Or Create New Thread
+                  </label>
+                  <input
+                    type="text"
+                    id="newNarrativeTitle"
+                    name="newNarrativeTitle"
+                    placeholder="e.g. Arctic Resource Conflict 2026"
+                    className="w-full px-3 py-2 border border-ink/10 rounded bg-paper/20 font-sans text-xs text-ink focus:outline-none focus:border-wax"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="border border-ink/10 p-4 rounded bg-paper/20 space-y-4">
