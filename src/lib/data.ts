@@ -570,6 +570,9 @@ const mockOpinions: Record<string, any[]> = {
   ]
 };
 
+// In-memory subscriptions fallback
+const mockSubscriptions: any[] = [];
+
 const mockNarratives = [
   {
     id: 'narrative-1',
@@ -1112,4 +1115,66 @@ export async function logIngestionRun(feedsChecked: number, newArticles: number,
   }
   console.log(`[INGESTION LOG] Feeds checked: ${feedsChecked}, new: ${newArticles}, skipped: ${skipped}, errors:`, errors);
   return null;
+}
+
+export async function savePushSubscription(endpoint: string, keys: any, categories: string[]) {
+  const dbConnected = await checkDbConnection();
+  if (dbConnected) {
+    try {
+      return await prisma.pushSubscription.upsert({
+        where: { endpoint },
+        update: { keys, categories },
+        create: { endpoint, keys, categories }
+      });
+    } catch (e) {
+      console.error('Error saving PushSubscription to DB:', e);
+    }
+  }
+
+  // Fallback to memory
+  const idx = mockSubscriptions.findIndex(s => s.endpoint === endpoint);
+  if (idx !== -1) {
+    mockSubscriptions[idx] = { endpoint, keys, categories, createdAt: new Date() };
+  } else {
+    mockSubscriptions.push({ id: `sub-${Date.now()}`, endpoint, keys, categories, createdAt: new Date() });
+  }
+  return mockSubscriptions;
+}
+
+export async function deletePushSubscription(endpoint: string) {
+  const dbConnected = await checkDbConnection();
+  if (dbConnected) {
+    try {
+      await prisma.pushSubscription.deleteMany({
+        where: { endpoint }
+      });
+    } catch (e) {
+      console.error('Error deleting expired PushSubscription from DB:', e);
+    }
+  }
+
+  // Fallback to memory
+  const idx = mockSubscriptions.findIndex(s => s.endpoint === endpoint);
+  if (idx !== -1) {
+    mockSubscriptions.splice(idx, 1);
+  }
+}
+
+export async function getPushSubscriptions(category?: string) {
+  const dbConnected = await checkDbConnection();
+  let subs = [];
+  if (dbConnected) {
+    try {
+      subs = await prisma.pushSubscription.findMany();
+    } catch (e) {
+      console.error('Error querying PushSubscriptions from DB:', e);
+    }
+  } else {
+    subs = mockSubscriptions;
+  }
+
+  if (category) {
+    return subs.filter((s: any) => s.categories.length === 0 || s.categories.includes(category));
+  }
+  return subs;
 }

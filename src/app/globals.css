@@ -1,21 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #E8E3D3;
-  --color-ink: #1B2027;
-  --color-wax: #C98A3B;
-  
-  --color-certainty-confirmed: #4A7856;
-  --color-certainty-official: #6E7C8C;
-  --color-certainty-analysis: #B98A3B;
-  --color-certainty-speculation: #A6432E;
+  --color-paper: var(--paper-color);
+  --color-ink: var(--ink-color);
+  --color-muted: var(--muted-color);
+  --color-wax: var(--wax-color);
+
+  --color-certainty-confirmed: #4a7856;
+  --color-certainty-official: #6e7c8c;
+  --color-certainty-analysis: #b98a3b;
+  --color-certainty-speculation: #a6432e;
 
   --font-serif: var(--font-source-serif), serif;
   --font-sans: var(--font-inter), sans-serif;
   --font-mono: var(--font-ibm-plex-mono), monospace;
 }
 
+:root {
+  --paper-color: #e8e3d3;
+  --ink-color: #1b2027;
+  --muted-color: #5c6570;
+  --wax-color: #c98a3b;
+}
+
+html[data-theme="dark"] {
+  --paper-color: #14171c;
+  --ink-color: #e8e3d3;
+  --muted-color: #9aa4b0;
+  --wax-color: #d9a257;
+}
+
 body {
-  background-color: #E8E3D3; /* bg-paper fallback */
-  color: #1B2027; /* text-ink fallback */
+  background-color: var(--paper-color);
+  color: var(--ink-color);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }

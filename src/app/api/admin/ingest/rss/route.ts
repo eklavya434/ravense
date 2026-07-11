@@ -3,6 +3,7 @@ import { fetchRssArticles } from '@/lib/rss';
 import { saveArticle } from '@/lib/data';
 import { extractEntities, generateEntityContext } from '@/lib/gemini';
 import { DEFAULT_STANCE_AXIS, CategoryKey } from '@/lib/categories';
+import { triggerIngestionNotifications } from '@/lib/push';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,7 @@ export async function POST(request: NextRequest) {
     const rssArticles = await fetchRssArticles(category as CategoryKey, 3);
     let ingestedCount = 0;
     const skippedArticles = [];
+    const savedArticlesList: Array<{ headline: string; slug: string; category: string }> = [];
 
     for (const item of rssArticles) {
       // Validate absolute URL
@@ -80,6 +82,7 @@ export async function POST(request: NextRequest) {
         });
 
         ingestedCount++;
+        savedArticlesList.push({ headline: item.headline, slug, category });
       } catch (err: any) {
         // Capture duplicates or failures
         skippedArticles.push({ 
@@ -87,6 +90,11 @@ export async function POST(request: NextRequest) {
           reason: err.message || 'Duplicate slug or DB write failure' 
         });
       }
+    }
+
+    // Trigger push alerts for newly ingested dispatches
+    if (savedArticlesList.length > 0) {
+      await triggerIngestionNotifications(savedArticlesList);
     }
 
     return NextResponse.json({

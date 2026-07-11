@@ -4,6 +4,7 @@ import { saveArticle, logIngestionRun } from '@/lib/data';
 import { extractEntities, generateEntityContext } from '@/lib/gemini';
 import { CATEGORIES, DEFAULT_STANCE_AXIS, CategoryKey } from '@/lib/categories';
 import { prisma } from '@/lib/db';
+import { triggerIngestionNotifications } from '@/lib/push';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,6 +98,7 @@ async function handleIngest(request: NextRequest) {
     // 3. Rate limit: Cap at 10 items processed per cron run
     const limit = 10;
     const itemsToProcess = uniqueCandidates.slice(0, limit);
+    const savedArticlesList: Array<{ headline: string; slug: string; category: string }> = [];
 
     for (const item of itemsToProcess) {
       const slug = item.headline
@@ -151,10 +153,16 @@ async function handleIngest(request: NextRequest) {
         });
 
         newArticles++;
+        savedArticlesList.push({ headline: item.headline, slug, category: item.category });
       } catch (err: any) {
         errors.push({ headline: item.headline, phase: 'ingest', message: err.message || 'Duplicate write failure' });
         skipped++;
       }
+    }
+
+    // Trigger push alerts for newly ingested dispatches
+    if (savedArticlesList.length > 0) {
+      await triggerIngestionNotifications(savedArticlesList);
     }
 
     // Record Ingestion log to DB

@@ -105,3 +105,11 @@ model IngestionLog {
   skipped       Int
   errors        Json?
 }
+
+model PushSubscription {
+  id            String   @id @default(cuid())
+  endpoint      String   @unique
+  keys          Json
+  categories    String[]
+  createdAt     DateTime @default(now())
+}
