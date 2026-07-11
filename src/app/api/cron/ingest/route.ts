@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 async function handleIngest(request: NextRequest) {
   // Validate Vercel Cron authorization secret
   const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     // Only enforce secret in production Vercel environments
     if (process.env.NODE_ENV === 'production') {
       return new Response('Unauthorized', { status: 401 });
