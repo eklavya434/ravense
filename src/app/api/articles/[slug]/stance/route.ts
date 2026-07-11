@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getArticleBySlug, getStanceVotes, recordStanceVote } from '@/lib/data';
+import { getArticleBySlug, getStanceVotes, recordStanceVote, getUserStanceVote } from '@/lib/data';
 import { getSessionId, setSessionIdCookie } from '@/lib/session';
 
 export async function GET(
@@ -15,6 +15,7 @@ export async function GET(
 
     const votes = await getStanceVotes(article.id);
     const { id: sessionId } = await getSessionId();
+    const userVote = await getUserStanceVote(article.id, sessionId);
 
     // Calculate distribution (10-point buckets: 0-9, 10-19, ..., 90-100)
     const buckets = Array(10).fill(0);
@@ -29,8 +30,7 @@ export async function GET(
       votesCount: votes.length,
       average,
       buckets,
-      // For demo, we don't have a lookup of single user vote easily without querying db
-      // We can query db inside GET to find user's specific vote if desired
+      userVote
     });
   } catch (error) {
     console.error('Error in GET stance votes:', error);

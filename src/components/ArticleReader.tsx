@@ -100,6 +100,10 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
             average: data.average,
             buckets: data.buckets,
           });
+          if (data.userVote !== null && data.userVote !== undefined) {
+            setHasVoted(true);
+            setVoteValue(data.userVote);
+          }
         }
       } catch (err) {
         console.error('Failed to fetch stance votes:', err);

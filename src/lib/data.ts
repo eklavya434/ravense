@@ -433,6 +433,21 @@ export async function getStanceVotes(articleId: string) {
   return mockStanceVotes[articleId] || [];
 }
 
+export async function getUserStanceVote(articleId: string, sessionId: string): Promise<number | null> {
+  const dbConnected = await checkDbConnection();
+  if (dbConnected) {
+    try {
+      const vote = await prisma.stanceVote.findFirst({
+        where: { articleId, sessionId }
+      });
+      return vote ? vote.value : null;
+    } catch (e) {
+      console.error(`Error fetching user stance vote from DB.`, e);
+    }
+  }
+  return null;
+}
+
 export async function recordStanceVote(articleId: string, value: number, sessionId: string) {
   const dbConnected = await checkDbConnection();
   if (dbConnected) {
