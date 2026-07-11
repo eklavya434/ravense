@@ -10,6 +10,8 @@ export async function ingestArticle(formData: FormData) {
   const body = formData.get('body') as string;
   const category = formData.get('category') as string;
   const sourceUrl = (formData.get('sourceUrl') as string) || undefined;
+  const sourceName = (formData.get('sourceName') as string) || undefined;
+  const sourceCountry = (formData.get('sourceCountry') as string) || undefined;
   const leftStance = (formData.get('leftStance') as string) || undefined;
   const rightStance = (formData.get('rightStance') as string) || undefined;
   const narrativeId = (formData.get('narrativeId') as string) || undefined;
@@ -68,8 +70,10 @@ export async function ingestArticle(formData: FormData) {
     body,
     category,
     sourceUrl,
+    sourceName,
+    sourceCountry,
     publishedAt: new Date(),
-    stanceAxis: stanceAxis as any, // Cast because it defaults per category in UI/data layer
+    stanceAxis: stanceAxis as any,
     narrativeId,
     newNarrativeTitle,
     entities: resolvedEntities,

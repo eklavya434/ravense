@@ -168,9 +168,16 @@ export default async function HomePage({ searchParams }: PageProps) {
                     >
                       {/* Top Metadata */}
                       <div className="flex items-center justify-between gap-4 mb-4">
-                        <span className="font-mono text-xs uppercase tracking-wider text-wax font-medium bg-wax/5 px-2 py-0.5 rounded border border-wax/10">
-                          {article.category}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono text-xs uppercase tracking-wider text-wax font-medium bg-wax/5 px-2 py-0.5 rounded border border-wax/10">
+                            {article.category}
+                          </span>
+                          {article.sourceName && (
+                            <span className="font-mono text-xs text-ink/50 bg-ink/5 px-2 py-0.5 rounded border border-ink/10">
+                              {article.sourceName}
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2 font-mono text-xs text-ink/50">
                           <time dateTime={new Date(article.publishedAt).toISOString()}>
                             {dateStr}

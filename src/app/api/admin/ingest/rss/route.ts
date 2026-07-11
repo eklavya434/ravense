@@ -66,6 +66,8 @@ export async function POST(request: NextRequest) {
           body: item.body,
           category,
           sourceUrl: item.sourceUrl,
+          sourceName: item.sourceName,
+          sourceCountry: item.sourceCountry,
           publishedAt: item.publishedAt,
           stanceAxis: stance,
           entities: resolvedEntities,

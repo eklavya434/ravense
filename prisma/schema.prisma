@@ -21,6 +21,8 @@ model Article {
   body            String          @db.Text
   category        Category
   sourceUrl       String?         @unique
+  sourceName      String?
+  sourceCountry   String?
   publishedAt     DateTime
   createdAt       DateTime        @default(now())
   entities        ArticleEntity[]

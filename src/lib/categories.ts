@@ -8,6 +8,12 @@ export const CATEGORIES = [
 
 export type CategoryKey = typeof CATEGORIES[number]['key'];
 
+export interface RssFeedSource {
+  name: string;
+  url: string;
+  country: string;
+}
+
 export const DEFAULT_STANCE_AXIS: Record<CategoryKey, { left: string; right: string }> = {
   geopolitics: { left: "De-escalates", right: "Escalates" },
   national: { left: "Positive for the public", right: "Concerning for the public" },
@@ -24,26 +30,26 @@ export const CATEGORY_QUERY_MAP: Record<CategoryKey, string> = {
   entertainment: "film set cinema stage",
 };
 
-export const RSS_FEEDS_CONFIG: Record<CategoryKey, string[]> = {
+export const RSS_FEEDS_CONFIG: Record<CategoryKey, RssFeedSource[]> = {
   geopolitics: [
-    "https://www.reutersagency.com/feed/?best-topics=political-news", // Reuters World RSS often changes; political-news or feeds are safe
-    "https://www.aljazeera.com/xml/rss/all.xml",
-    "https://feeds.bbci.co.uk/news/world/rss.xml"
+    { name: "Reuters News", url: "https://www.reutersagency.com/feed/?best-topics=political-news", country: "Global" },
+    { name: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml", country: "Qatar" },
+    { name: "BBC World", url: "https://feeds.bbci.co.uk/news/world/rss.xml", country: "UK" }
   ],
   national: [
-    "https://www.thehindu.com/news/national/feeder/default.rss",
-    "https://indianexpress.com/section/india/feed/"
+    { name: "The Hindu", url: "https://www.thehindu.com/news/national/feeder/default.rss", country: "India" },
+    { name: "Indian Express", url: "https://indianexpress.com/section/india/feed/", country: "India" }
   ],
   business: [
-    "https://economictimes.indiatimes.com/rssfeedsdefault.cms",
-    "https://www.livemint.com/rss/news"
+    { name: "Economic Times", url: "https://economictimes.indiatimes.com/rssfeedsdefault.cms", country: "India" },
+    { name: "Livemint", url: "https://www.livemint.com/rss/news", country: "India" }
   ],
   sports: [
-    "https://www.espncricinfo.com/rss/content/story/feeds/0.xml",
-    "https://www.thehindu.com/sport/feeder/default.rss"
+    { name: "ESPN Cricinfo", url: "https://www.espncricinfo.com/rss/content/story/feeds/0.xml", country: "Global" },
+    { name: "The Hindu Sport", url: "https://www.thehindu.com/sport/feeder/default.rss", country: "India" }
   ],
   entertainment: [
-    "https://indianexpress.com/section/entertainment/feed/",
-    "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml"
+    { name: "Indian Express Ent", url: "https://indianexpress.com/section/entertainment/feed/", country: "India" },
+    { name: "Hindustan Times Ent", url: "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml", country: "India" }
   ]
 };

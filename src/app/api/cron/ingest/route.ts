@@ -32,7 +32,7 @@ async function handleIngest(request: NextRequest) {
 
   try {
     // 1. Gather candidate articles from all categories
-    const candidates: Array<{ headline: string; body: string; sourceUrl: string; publishedAt: Date; category: string }> = [];
+    const candidates: Array<{ headline: string; body: string; sourceUrl: string; publishedAt: Date; category: string; sourceName: string; sourceCountry: string }> = [];
 
     for (const cat of CATEGORIES) {
       feedsChecked += 2; // Approx 2 feeds per category configuration
@@ -137,6 +137,8 @@ async function handleIngest(request: NextRequest) {
           body: item.body,
           category: item.category,
           sourceUrl: item.sourceUrl,
+          sourceName: item.sourceName,
+          sourceCountry: item.sourceCountry,
           publishedAt: item.publishedAt,
           stanceAxis: stance,
           entities: resolvedEntities,

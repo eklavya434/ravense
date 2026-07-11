@@ -30,7 +30,7 @@ export default function IngestPage() {
       }
     };
     fetchNarratives();
-  }, [successMsg]); // Reload when an article is successfully ingested (which might have created a new thread)
+  }, [successMsg]);
 
   const handleManualSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -161,7 +161,7 @@ export default function IngestPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label htmlFor="category" className="block font-mono text-xs uppercase tracking-wider text-ink/70">
                   Category
@@ -179,17 +179,43 @@ export default function IngestPage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="sourceUrl" className="block font-mono text-xs uppercase tracking-wider text-ink/70">
-                  Source URL (Optional)
+                <label htmlFor="sourceName" className="block font-mono text-xs uppercase tracking-wider text-ink/70">
+                  Source Name (Optional)
                 </label>
                 <input
-                  type="url"
-                  id="sourceUrl"
-                  name="sourceUrl"
-                  placeholder="https://example.com/original-article"
+                  type="text"
+                  id="sourceName"
+                  name="sourceName"
+                  placeholder="e.g. Reuters"
                   className="w-full px-4 py-2.5 border border-ink/20 rounded bg-paper/30 font-sans text-sm text-ink focus:outline-none focus:border-wax focus:bg-paper"
                 />
               </div>
+
+              <div className="space-y-2">
+                <label htmlFor="sourceCountry" className="block font-mono text-xs uppercase tracking-wider text-ink/70">
+                  Source Country (Optional)
+                </label>
+                <input
+                  type="text"
+                  id="sourceCountry"
+                  name="sourceCountry"
+                  placeholder="e.g. Global"
+                  className="w-full px-4 py-2.5 border border-ink/20 rounded bg-paper/30 font-sans text-sm text-ink focus:outline-none focus:border-wax focus:bg-paper"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="sourceUrl" className="block font-mono text-xs uppercase tracking-wider text-ink/70">
+                Source URL (Optional)
+              </label>
+              <input
+                type="url"
+                id="sourceUrl"
+                name="sourceUrl"
+                placeholder="https://example.com/original-article"
+                className="w-full px-4 py-2.5 border border-ink/20 rounded bg-paper/30 font-sans text-sm text-ink focus:outline-none focus:border-wax focus:bg-paper"
+              />
             </div>
 
             <div className="space-y-2">
@@ -309,14 +335,15 @@ export default function IngestPage() {
             </div>
 
             {/* Configured feeds display */}
-            <div className="bg-ink/5 p-4 rounded border border-ink/5 space-y-2">
+            <div className="bg-ink/5 p-4 rounded border border-ink/5 space-y-3">
               <span className="block font-mono text-[9px] uppercase tracking-widest text-ink/40">
                 Configured RSS Feeds
               </span>
-              <ul className="space-y-1.5 font-mono text-[10px] text-ink/70 break-all list-disc list-inside">
+              <ul className="space-y-2.5 font-mono text-[10px] text-ink/75 break-all list-none pl-0">
                 {RSS_FEEDS_CONFIG[selectedRssCategory]?.map((feed, index) => (
-                  <li key={index} className="truncate" title={feed}>
-                    {feed.replace('https://', '')}
+                  <li key={index} className="border-b border-ink/5 pb-1.5 last:border-b-0 last:pb-0" title={feed.url}>
+                    <span className="font-bold text-ink/90 block">{feed.name} ({feed.country})</span>
+                    <span className="block text-[8px] text-ink/40 leading-none mt-0.5">{feed.url.replace('https://', '')}</span>
                   </li>
                 ))}
               </ul>

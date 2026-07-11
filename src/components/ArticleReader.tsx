@@ -36,6 +36,8 @@ interface Article {
   category: string;
   publishedAt: string | Date;
   sourceUrl: string | null;
+  sourceName?: string | null;
+  sourceCountry?: string | null;
   narrativeId: string | null;
   stanceAxis: any; // { left: string, right: string }
   categoryImageId?: string | null;
@@ -341,6 +343,11 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
                 <span className="font-mono text-xs uppercase tracking-wider text-wax font-medium bg-wax/5 px-2 py-0.5 rounded border border-wax/10">
                   {article.category}
                 </span>
+                {article.sourceName && (
+                  <span className="font-mono text-xs text-ink/60 bg-ink/5 px-2 py-0.5 rounded border border-ink/10">
+                    {article.sourceName} {article.sourceCountry ? `(${article.sourceCountry})` : ''}
+                  </span>
+                )}
                 <time dateTime={new Date(article.publishedAt).toISOString()} className="font-mono text-xs text-ink/50">
                   {formattedDate}
                 </time>
@@ -362,9 +369,9 @@ export default function ArticleReader({ article, initialVotes }: ArticleReaderPr
                   href={article.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-xs text-wax hover:underline"
+                  className="font-mono text-xs text-wax hover:underline inline-flex items-center gap-1.5"
                 >
-                  Source: Original dispatch report &nearr;
+                  Read full story at {article.sourceName || 'original publisher'} {article.sourceCountry ? `(${article.sourceCountry})` : ''} &nearr;
                 </a>
               </div>
             )}

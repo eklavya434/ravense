@@ -207,6 +207,8 @@ const mockArticles: any[] = [
     publishedAt: new Date(),
     createdAt: new Date(),
     sourceUrl: 'https://example.com/nato-antalya',
+    sourceName: 'Reuters News',
+    sourceCountry: 'Global',
     narrativeId: 'narrative-1',
     narrative: mockNarrative,
     stanceAxis: { left: 'De-escalates', right: 'Escalates' },
@@ -226,6 +228,8 @@ const mockArticles: any[] = [
     publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
     sourceUrl: 'https://example.com/indian-data-act',
+    sourceName: 'The Hindu',
+    sourceCountry: 'India',
     narrativeId: null,
     narrative: null,
     stanceAxis: { left: 'Positive for the public', right: 'Concerning for the public' },
@@ -244,6 +248,8 @@ const mockArticles: any[] = [
     publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     sourceUrl: 'https://example.com/tech-automation',
+    sourceName: 'Economic Times',
+    sourceCountry: 'India',
     narrativeId: null,
     narrative: null,
     stanceAxis: { left: 'Bearish', right: 'Bullish' },
@@ -262,6 +268,8 @@ const mockArticles: any[] = [
     publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     sourceUrl: 'https://example.com/wembley-victory',
+    sourceName: 'ESPN Cricinfo',
+    sourceCountry: 'Global',
     narrativeId: null,
     narrative: null,
     stanceAxis: { left: 'Underdog wins', right: 'Favorite wins' },
@@ -280,6 +288,8 @@ const mockArticles: any[] = [
     publishedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
     sourceUrl: 'https://example.com/cannes-stage',
+    sourceName: 'Hindustan Times Ent',
+    sourceCountry: 'India',
     narrativeId: null,
     narrative: null,
     stanceAxis: { left: 'Underwhelming', right: 'Lives up to the hype' },
@@ -345,9 +355,11 @@ export async function getArticles() {
     slug: a.slug,
     body: a.body,
     category: a.category,
+    sourceUrl: a.sourceUrl,
+    sourceName: a.sourceName,
+    sourceCountry: a.sourceCountry,
     publishedAt: a.publishedAt,
     createdAt: a.createdAt,
-    sourceUrl: a.sourceUrl,
     narrativeId: a.narrativeId,
     narrative: a.narrative,
     stanceAxis: a.stanceAxis,
@@ -522,6 +534,8 @@ export async function saveArticle(data: {
   body: string;
   category: string;
   sourceUrl?: string;
+  sourceName?: string;
+  sourceCountry?: string;
   publishedAt: Date;
   stanceAxis: { left: string; right: string };
   narrativeId?: string;
@@ -603,6 +617,8 @@ export async function saveArticle(data: {
             body: data.body,
             category: categoryEnum,
             sourceUrl: data.sourceUrl,
+            sourceName: data.sourceName,
+            sourceCountry: data.sourceCountry,
             publishedAt: data.publishedAt,
             stanceAxis: data.stanceAxis,
             categoryImageId: dbCatImg.id,
@@ -735,6 +751,8 @@ export async function saveArticle(data: {
     publishedAt: data.publishedAt,
     createdAt: new Date(),
     sourceUrl: data.sourceUrl || null,
+    sourceName: data.sourceName || null,
+    sourceCountry: data.sourceCountry || null,
     narrativeId: mockNarrativeObj ? mockNarrativeObj.id : null,
     narrative: mockNarrativeObj,
     stanceAxis: data.stanceAxis,

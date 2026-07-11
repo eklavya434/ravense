@@ -8,16 +8,17 @@ export interface RssArticleItem {
   body: string;
   sourceUrl: string;
   publishedAt: Date;
+  sourceName: string;
+  sourceCountry: string;
 }
 
 export async function fetchRssArticles(category: CategoryKey, limit: number = 3): Promise<RssArticleItem[]> {
-  const urls = RSS_FEEDS_CONFIG[category] || [];
+  const feeds = RSS_FEEDS_CONFIG[category] || [];
   const articles: RssArticleItem[] = [];
 
-  for (const url of urls) {
+  for (const feedConfig of feeds) {
     try {
-      // Fetch feed with custom user agent headers
-      const response = await fetch(url, {
+      const response = await fetch(feedConfig.url, {
         headers: {
           'User-Agent': 'Ravense/0.1 (student project; contact: eklavya434@gmail.com)'
         }
@@ -45,11 +46,13 @@ export async function fetchRssArticles(category: CategoryKey, limit: number = 3)
           headline: item.title,
           body: cleanContent,
           sourceUrl: item.link,
-          publishedAt: item.pubDate ? new Date(item.pubDate) : new Date()
+          publishedAt: item.pubDate ? new Date(item.pubDate) : new Date(),
+          sourceName: feedConfig.name,
+          sourceCountry: feedConfig.country
         });
       }
     } catch (e) {
-      console.warn(`Failed to parse RSS feed from ${url}:`, e);
+      console.warn(`Failed to parse RSS feed from ${feedConfig.url}:`, e);
     }
   }
 
