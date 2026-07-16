@@ -2,9 +2,9 @@
 
 import { redirect } from 'next/navigation';
 import { saveArticle } from '@/lib/data';
-import { extractEntities, generateEntityContext } from '@/lib/gemini';
+import { extractEntities, generateEntityContext, generateSummary } from '@/lib/gemini';
 import { Category } from '@prisma/client';
-import { normalizeUrl } from '@/lib/rss';
+import { normalizeUrl, verifySourceLink } from '@/lib/rss';
 
 export async function ingestArticle(formData: FormData) {
   const headline = formData.get('headline') as string;
@@ -31,12 +31,23 @@ export async function ingestArticle(formData: FormData) {
     normalizedSourceUrl = resUrl;
   }
 
+  let sourceLinkVerified = false;
+  let sourceLinkCheckedAt = new Date();
+  if (normalizedSourceUrl) {
+    const linkStatus = await verifySourceLink(normalizedSourceUrl);
+    sourceLinkVerified = linkStatus.verified;
+    sourceLinkCheckedAt = linkStatus.checkedAt;
+  }
+
   // Generate slug
   const slug = headline
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-');
+
+  // Generate consistent ~60-word explanation via Gemini
+  const summaryText = await generateSummary(headline, body);
 
   // 1. Run entity extraction via Gemini (or fallback)
   const extracted = await extractEntities(headline, body);
@@ -87,6 +98,9 @@ export async function ingestArticle(formData: FormData) {
     narrativeId,
     newNarrativeTitle,
     entities: resolvedEntities,
+    summary: summaryText,
+    sourceLinkVerified,
+    sourceLinkCheckedAt,
   });
 
   // Redirect to the newly created article detail page

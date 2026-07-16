@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchRssArticles } from '@/lib/rss';
+import { fetchRssArticles, verifySourceLink } from '@/lib/rss';
 import { saveArticle, logIngestionRun } from '@/lib/data';
-import { extractEntities, generateEntityContext } from '@/lib/gemini';
+import { extractEntities, generateEntityContext, generateSummary } from '@/lib/gemini';
 import { CATEGORIES, DEFAULT_STANCE_AXIS, CategoryKey } from '@/lib/categories';
 import { prisma } from '@/lib/db';
 import { triggerIngestionNotifications } from '@/lib/push';
@@ -59,6 +59,14 @@ async function handleIngest(request: NextRequest) {
         continue;
       }
 
+      // Staleness cutoff check: 7 days ago
+      const stalenessCutoff = new Date();
+      stalenessCutoff.setDate(stalenessCutoff.getDate() - 7);
+      if (item.publishedAt < stalenessCutoff) {
+        skipped++;
+        continue;
+      }
+
       // Check slug uniqueness
       const slug = item.headline
         .toLowerCase()
@@ -69,7 +77,7 @@ async function handleIngest(request: NextRequest) {
       let exists = false;
       try {
         // Quick look up in Postgres database
-        const dbConnected = !!process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost:5432/ravense');
+        const dbConnected = !!process.env.DATABASE_URL;
         if (dbConnected) {
           const dbMatch = await prisma.article.findFirst({
             where: {
@@ -108,6 +116,17 @@ async function handleIngest(request: NextRequest) {
         .replace(/\s+/g, '-');
 
       try {
+        // Verify source link before proceeding
+        const linkStatus = await verifySourceLink(item.sourceUrl);
+        if (!linkStatus.verified) {
+          console.warn(`Ingestion: Discarding article because sourceUrl link check failed: ${item.sourceUrl}`);
+          skipped++;
+          continue;
+        }
+
+        // Generate consistent ~60-word explanation via Gemini
+        const summaryText = await generateSummary(item.headline, item.body);
+
         // Run entity extraction via Gemini (or fallback)
         const extracted = await extractEntities(item.headline, item.body);
 
@@ -150,6 +169,9 @@ async function handleIngest(request: NextRequest) {
           publishedAt: item.publishedAt,
           stanceAxis: stance,
           entities: resolvedEntities,
+          summary: summaryText,
+          sourceLinkVerified: linkStatus.verified,
+          sourceLinkCheckedAt: linkStatus.checkedAt,
         });
 
         newArticles++;

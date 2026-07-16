@@ -31,6 +31,9 @@ model Article {
   stanceAxis      Json?           // e.g. { left: "De-escalates", right: "Escalates" }
   stanceVotes     StanceVote[]
   opinions        Opinion[]
+  summary              String?         @db.Text
+  sourceLinkVerified   Boolean         @default(false)
+  sourceLinkCheckedAt  DateTime?
   categoryImageId String?
   categoryImage   CategoryImage? @relation(fields: [categoryImageId], references: [id])
 }

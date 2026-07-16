@@ -190,9 +190,9 @@ export default async function HomePage({ searchParams }: PageProps) {
                         </Link>
                       </h2>
 
-                      {/* Teaser (Full 60-word body) */}
+                      {/* Teaser (Generated 60-word summary) */}
                       <p className="mt-4 font-sans text-sm md:text-base text-ink/75 leading-relaxed">
-                        {article.body}
+                        {article.summary || article.body}
                       </p>
 
                       {/* Footer Actions */}
@@ -203,7 +203,7 @@ export default async function HomePage({ searchParams }: PageProps) {
                         >
                           Analyze Dispatch &rarr;
                         </Link>
-                        {article.sourceUrl && (
+                        {article.sourceUrl && article.sourceLinkVerified && (
                           <a 
                             href={article.sourceUrl}
                             target="_blank"

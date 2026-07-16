@@ -26,6 +26,9 @@ export default async function ArticlePage({ params }: PageProps) {
     ...article,
     publishedAt: article.publishedAt instanceof Date ? article.publishedAt.toISOString() : article.publishedAt,
     createdAt: article.createdAt instanceof Date ? article.createdAt.toISOString() : article.createdAt,
+    sourceLinkCheckedAt: article.sourceLinkCheckedAt instanceof Date 
+      ? article.sourceLinkCheckedAt.toISOString() 
+      : article.sourceLinkCheckedAt,
     categoryImage: article.categoryImage
       ? {
           ...article.categoryImage,

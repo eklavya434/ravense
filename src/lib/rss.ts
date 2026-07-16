@@ -94,3 +94,49 @@ export async function fetchRssArticles(category: CategoryKey, limit: number = 3)
   // Sort by date descending
   return articles.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 }
+
+export async function verifySourceLink(url: string): Promise<{ verified: boolean; checkedAt: Date }> {
+  if (!url || (!url.startsWith('http://') && !url.startsWith('https://'))) {
+    return { verified: false, checkedAt: new Date() };
+  }
+  
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Ravense/0.1 (link validator; contact: eklavya434@gmail.com)'
+      }
+    });
+    
+    clearTimeout(timeoutId);
+    
+    const isOk = response.status >= 200 && response.status < 400;
+    return { verified: isOk, checkedAt: new Date() };
+  } catch (error) {
+    console.warn(`Source link check failed for ${url}:`, error);
+    
+    // Fallback GET request with Range header
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const getResponse = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Range': 'bytes=0-100',
+          'User-Agent': 'Ravense/0.1 (link validator; contact: eklavya434@gmail.com)'
+        },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      const isOk = getResponse.status >= 200 && getResponse.status < 400;
+      return { verified: isOk, checkedAt: new Date() };
+    } catch {
+      return { verified: false, checkedAt: new Date() };
+    }
+  }
+}
+

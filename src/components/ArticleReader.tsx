@@ -59,6 +59,9 @@ interface Article {
     }>;
   } | null;
   entities: Mention[];
+  summary?: string | null;
+  sourceLinkVerified?: boolean;
+  sourceLinkCheckedAt?: string | Date | null;
 }
 
 interface Opinion {
@@ -385,13 +388,20 @@ export default function ArticleReader({ article, initialVotes, initialOpinions }
               <div className="h-px bg-ink/10 w-full" />
             </header>
 
+            {/* Summary explanation */}
+            {article.summary && (
+              <div className="bg-wax/5 border-l-4 border-wax p-4 rounded-r-lg font-sans text-sm md:text-base text-ink/80 leading-relaxed italic mb-6 shadow-sm">
+                <strong>Summary (TL;DR):</strong> {article.summary}
+              </div>
+            )}
+
             {/* Reading body */}
             <section className="font-sans text-base md:text-lg text-ink/90 leading-relaxed space-y-6 antialiased pt-2">
               <p className="indent-8">{renderBody()}</p>
             </section>
 
             {/* Prominent external link button */}
-            {article.sourceUrl && (
+            {article.sourceUrl && article.sourceLinkVerified && (
               <div className="pt-6 border-t border-ink/5 mt-8 flex justify-center md:justify-start">
                 <a 
                   href={article.sourceUrl}

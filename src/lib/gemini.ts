@@ -285,3 +285,48 @@ Return your response strictly as a JSON object:
   }
 }
 
+export async function generateSummary(headline: string, body: string): Promise<string> {
+  const fallbackSummary = (text: string): string => {
+    const words = text.split(/\s+/).filter(Boolean);
+    if (words.length <= 60) return text;
+    return words.slice(0, 60).join(' ') + '...';
+  };
+
+  if (!genAI) {
+    console.warn('Gemini client not initialized. Falling back to local truncation.');
+    return fallbackSummary(body);
+  }
+
+  const runGeneration = async (retryPromptReminder = '') => {
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const prompt = `Headline: "${headline}"
+News Content: "${body}"
+
+Summarize this news item in exactly 55-65 words. Plain, neutral language. No speculation beyond what's stated. Do not use the exact phrasing of the source — write it fresh. Output only the summary, nothing else.${retryPromptReminder}`;
+    const response = await model.generateContent(prompt);
+    return response.response.text().trim();
+  };
+
+  try {
+    let summary = await runGeneration();
+    let wordCount = summary.split(/\s+/).filter(Boolean).length;
+
+    // Strict validation: if under 30 or over 90 words, retry once
+    if (wordCount < 30 || wordCount > 90) {
+      console.warn(`Word count ${wordCount} out of bounds (30-90). Retrying summary generation...`);
+      summary = await runGeneration('\n\nSTRICT REQUIREMENT: Your previous response was either too short or too long. You MUST output exactly between 55 and 65 words. Write in exactly 3 to 4 concise sentences.');
+      wordCount = summary.split(/\s+/).filter(Boolean).length;
+    }
+
+    if (wordCount < 30 || wordCount > 90) {
+      console.warn(`Second summary attempt also out of bounds (${wordCount} words). Falling back to truncation.`);
+      return fallbackSummary(body);
+    }
+
+    return summary;
+  } catch (error) {
+    console.error('Error generating summary:', error);
+    return fallbackSummary(body);
+  }
+}
+

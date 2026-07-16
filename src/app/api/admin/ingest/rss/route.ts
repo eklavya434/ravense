@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchRssArticles } from '@/lib/rss';
+import { fetchRssArticles, verifySourceLink } from '@/lib/rss';
 import { saveArticle } from '@/lib/data';
-import { extractEntities, generateEntityContext } from '@/lib/gemini';
+import { extractEntities, generateEntityContext, generateSummary } from '@/lib/gemini';
 import { DEFAULT_STANCE_AXIS, CategoryKey } from '@/lib/categories';
 import { triggerIngestionNotifications } from '@/lib/push';
 
@@ -29,6 +29,14 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
+      // Staleness cutoff check: 7 days ago
+      const stalenessCutoff = new Date();
+      stalenessCutoff.setDate(stalenessCutoff.getDate() - 7);
+      if (item.publishedAt < stalenessCutoff) {
+        skippedArticles.push({ headline: item.headline, reason: 'Article is older than 7 days staleness cutoff' });
+        continue;
+      }
+
       // Create a clean slug
       const slug = item.headline
         .toLowerCase()
@@ -37,6 +45,16 @@ export async function POST(request: NextRequest) {
         .replace(/\s+/g, '-');
 
       try {
+        // Verify source link before proceeding
+        const linkStatus = await verifySourceLink(item.sourceUrl);
+        if (!linkStatus.verified) {
+          skippedArticles.push({ headline: item.headline, reason: `Source URL failed link check: ${item.sourceUrl}` });
+          continue;
+        }
+
+        // Generate consistent ~60-word explanation via Gemini
+        const summaryText = await generateSummary(item.headline, item.body);
+
         // Run entity extraction via Gemini (or fallback)
         const extracted = await extractEntities(item.headline, item.body);
 
@@ -79,6 +97,9 @@ export async function POST(request: NextRequest) {
           publishedAt: item.publishedAt,
           stanceAxis: stance,
           entities: resolvedEntities,
+          summary: summaryText,
+          sourceLinkVerified: linkStatus.verified,
+          sourceLinkCheckedAt: linkStatus.checkedAt,
         });
 
         ingestedCount++;

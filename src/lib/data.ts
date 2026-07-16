@@ -548,6 +548,12 @@ const mockArticles: any[] = [
   }
 ];
 
+mockArticles.forEach(a => {
+  if (!a.summary) a.summary = a.body;
+  if (a.sourceLinkVerified === undefined) a.sourceLinkVerified = true;
+  if (!a.sourceLinkCheckedAt) a.sourceLinkCheckedAt = new Date();
+});
+
 // In-memory stance votes fallback
 const mockStanceVotes: Record<string, number[]> = {
   'article-1': [10, 20, 30, 45, 60, 62, 70, 75, 80],
@@ -628,6 +634,9 @@ export async function getArticles() {
     stanceAxis: a.stanceAxis,
     categoryImageId: a.categoryImageId,
     categoryImage: a.categoryImage,
+    summary: a.summary || null,
+    sourceLinkVerified: a.sourceLinkVerified ?? false,
+    sourceLinkCheckedAt: a.sourceLinkCheckedAt || null,
   }));
 }
 
@@ -870,6 +879,9 @@ export async function saveArticle(data: {
   stanceAxis: { left: string; right: string };
   narrativeId?: string;
   newNarrativeTitle?: string;
+  summary?: string;
+  sourceLinkVerified?: boolean;
+  sourceLinkCheckedAt?: Date;
   entities: Array<{
     name: string;
     aliases: string[];
@@ -953,6 +965,9 @@ export async function saveArticle(data: {
             stanceAxis: data.stanceAxis,
             categoryImageId: dbCatImg.id,
             narrativeId: finalNarrativeId,
+            summary: data.summary,
+            sourceLinkVerified: data.sourceLinkVerified,
+            sourceLinkCheckedAt: data.sourceLinkCheckedAt,
           },
         });
 
@@ -1088,6 +1103,9 @@ export async function saveArticle(data: {
     stanceAxis: data.stanceAxis,
     categoryImageId: memoryCatImg.id,
     categoryImage: memoryCatImg,
+    summary: data.summary || null,
+    sourceLinkVerified: data.sourceLinkVerified ?? false,
+    sourceLinkCheckedAt: data.sourceLinkCheckedAt || null,
     entities: relationEntities,
   };
 
